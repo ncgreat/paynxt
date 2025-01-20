@@ -1,0 +1,10 @@
+export { default as Feature } from './feature/Feature';
+export { default as Footer } from './footer/Footer';
+export { default as Header } from './header/Header';
+export { default as Navbar } from './navbar/Navbar';
+export { default as Partners } from './partners/Partners';
+export { default as CTA } from './cta/CTA';
+export { default as Actions } from './actions/Actions';
+export { default as Wallet } from './wallet/Wallet';
+export { default as Transactions } from './transactions/Transactions';
+export { default as Confirm } from './transactions/Confirm';

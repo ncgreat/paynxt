@@ -1,0 +1,55 @@
+.super__partner {
+	display: flex;
+	flex-direction: row;
+	margin-top: 20px;
+}
+.super__partner-content {
+	display: flex;
+	flex-direction: column;
+	/* justify-content: space-between; */
+	width: 100%;
+	/* padding: 0 25%; */
+	margin: 0 auto;
+}
+
+.super__partner-logos {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	/* position: sticky;
+	top: 0; */
+	/* border: 1px solid #ccc; */
+	/*background: #fcfcfc;*/
+	z-index: -99999;
+	margin-top: 20px;
+	/* background: rgba(255, 255, 255, 0.14);
+
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(0px);
+	-webkit-backdrop-filter: blur(0px); */
+	/* border: 1px solid rgba(255, 255, 255, 0.96); */
+}
+.ticker-logos {
+	background: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.27);
+	backdrop-filter: blur(18.5px);
+	-webkit-backdrop-filter: blur(18.5px);
+	border-radius: 10px;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	padding: 10px;
+}
+
+.super__partner-header {
+	display: flex;
+	flex-direction: row;
+	margin: 0 auto;
+	text-align: center;
+	font-weight: 600;
+	font-size: 1.4rem;
+}
+
+.super__partner-header h2 {
+	text-shadow: 1px 0px 1px #ccc, 0px 1px 1px #eee, 2px 1px 1px #ccc,
+		1px 2px 1px #eee, 3px 2px 1px #ccc;
+}

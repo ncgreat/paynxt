@@ -1,0 +1,156 @@
+.super__cta_trynow {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	place-items: center;
+}
+
+.super__transactions-content {
+	display: flex;
+	flex-direction: row;
+	/* justify-content: center;
+	place-items: center; */
+	/* width: 100%; */
+	padding: 0 14%;
+	margin-top: 35px;
+}
+
+.super__transactions-content h3 {
+	font-family: var(--font-family);
+	font-weight: 500;
+	font-size: 18px;
+	/* line-height: 60px; */
+	text-align: center;
+	/* margin-top: 45px; */
+	/* letter-spacing: -0.04em; */
+	color: #121417;
+	/* text-shadow: 1px 1px 2px #3f1d47; */
+}
+
+.super__cta_trynow button {
+	display: flex;
+	justify-content: center;
+	place-items: center;
+	font-family: var(--font-family);
+	font-size: 14px;
+	font-weight: 500;
+	letter-spacing: 0.05em;
+
+	padding: 0.3rem 0.85rem;
+	gap: 4px;
+	/* color: #f4eff6; */
+	border-radius: 10px;
+	margin: 0.3rem;
+	height: 36px;
+	/* background: #582066; */
+}
+
+.try-now {
+	background: #582066;
+	color: #f4eff6;
+	border-radius: 10px;
+	margin: 0.3rem;
+}
+
+.support {
+	background: #eeefef;
+	color: #5a6475;
+
+	border-radius: 10px;
+}
+
+.transaction__icon-success {
+	width: 35px;
+	height: 35px;
+	padding: 5px;
+	border-radius: 10px;
+	color: #009879 !important;
+	border: 1px solid #ddd;
+	margin-left: 0.8rem;
+}
+
+.transaction__icon-failed {
+	border-radius: 10px;
+	width: 35px;
+	height: 35px;
+	padding: 5px;
+	border: 1px solid #ddd;
+	color: #980000 !important;
+	margin-left: 0.8rem;
+}
+
+.icon__header {
+	/* width: 20px; */
+}
+
+.styled-table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 0.9em;
+	min-width: 400px;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+	/* padding: 0 10%; */
+}
+
+.styled-table thead tr {
+	background-color: #0f3512;
+	color: #ffffff;
+	text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+	padding: 12px 0px;
+}
+
+.styled-table tbody tr {
+	border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+	background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+	border-bottom: 2px solid #582066;
+}
+
+.styled-table tbody tr.active-row {
+	font-weight: bold;
+	color: #582066;
+}
+
+.table-col {
+	display: flex;
+	flex-direction: column;
+	/* padding-left: 3.2rem; */
+}
+
+.text-bold {
+	font-weight: 500;
+}
+.super__transactions {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 3% 14%;
+}
+
+button.page {
+    margin: 5px 2px;
+    padding: 10px 20px;
+    cursor: pointer;
+	border-radius: 5px;
+}
+
+button.page:hover{
+	/* background: #582066; */
+	background-image: linear-gradient(rgb(128, 0, 111),rgb(179, 20, 118));
+	color: #fff;
+}
+
+button.page:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+	color: #000;
+}

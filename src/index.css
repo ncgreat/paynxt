@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--font-family: 'Manrope', sans-serif;
+
+	--gradient-text: linear-gradient(89.97deg, #ae67fa 1.84%, #f49867 102.67%);
+	--gradient-bar: linear-gradient(103.22deg, #ae67fa -13.86%, #f49867 99.55%);
+	--cta-gradient: linear-gradient(90deg, #ff6d26 0%, #ffaf65 100%);
+
+	--color-bg: #071a22;
+	--color-footer: #031b34;
+	--color-blog: #042c54;
+	--color-text: #81afdd;
+	--color-subtext: #ff8a71;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}

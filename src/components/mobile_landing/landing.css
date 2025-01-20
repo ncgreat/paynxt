@@ -1,0 +1,13 @@
+/* Optional: Customize the dots */
+.slick-dots li button:before {
+    color: #333; 
+  }
+  
+  .slick-dots li.slick-active button:before {
+    color: #3f1d47; 
+  }
+
+  .main{
+    /* background: #ff0000; */
+    height: 100vh;
+  }
