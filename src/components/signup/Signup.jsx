@@ -1,198 +1,232 @@
-// import { Link, useNavigate } from 'react-router-dom';
 import { Link, useHistory } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
-import {
-	RiUser3Fill,
-	RiLockPasswordFill,
-	RiPhoneFill,
-	RiMailFill,
-	RiCloseFill,
-} from 'react-icons/ri';
+import { RiUser3Fill, RiLockPasswordFill, RiMailFill, RiCloseFill, RiEyeFill, RiEyeOffFill } from 'react-icons/ri';
 import './signup.css';
-import {createRef, useState} from "react";
+import { useRef, useState } from "react";
 import axiosClient from "../../axios-client.js";
-import {useStateContext} from "../../context/ContextProvider.jsx";
+import { useStateContext } from "../../context/ContextProvider.jsx";
+import logo from '../../assets/logo.png';
+import { motion } from 'framer-motion';
+import process from '../../assets/process.gif';
 
 const Signup = () => {
-	// const navigate = useNavigate();
-	const navigate = useHistory();
+  const navigate = useHistory();
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const passwordConfirmationRef = useRef(null);
+  const { setUser, setToken } = useStateContext();
+  const [errors, setErrors] = useState(null);
+  const [emailError, setEmailError] = useState(null);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
-	// const [name, setName] = useState('');
-	// const [email, setEmail] = useState('');
-	// const [phone, setPhone] = useState('');
-	// const [password, setPassword] = useState('');
-	// const [repassword, setRePassword] = useState('');
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
- const nameRef = createRef()
-  const emailRef = createRef()
-  const passwordRef = createRef()
-  const passwordConfirmationRef = createRef()
-  const {setUser, setToken} = useStateContext()
-  const [errors, setErrors] = useState(null)
+  const handleSignup = async (event) => {
+    event.preventDefault();
+    setIsSignUp(true);
 
-	const onSubmit = ev => {
-		ev.preventDefault()
-	
-		const payload = {
-		  name: nameRef.current.value,
-		  email: emailRef.current.value,
-		  password: passwordRef.current.value,
-		  password_confirmation: passwordConfirmationRef.current.value,
-		}
-		axiosClient.post('/signup', payload)
-		  .then(({data}) => {
-			setUser(data.user)
-			setToken(data.token);
-		  })
-		  .catch(err => {
-			const response = err.response;
-			if (response && response.status === 422) {
-			  setErrors(response.data.errors)
-			}
-		  })
-	  }
+    const email = emailRef.current.value;
+    if (!isValidEmail(email)) {
+      setEmailError("Please enter a valid email address.");
+      setIsSignUp(false);
+      return;
+    }
+    setEmailError(null);
 
+    const payload = {
+      name: nameRef.current.value,
+      email,
+      password: passwordRef.current.value,
+      password_confirmation: passwordConfirmationRef.current.value,
+    };
 
-	  // Email/password signup handler (optional for new users)
-	  const handleSignup = async () => {
-		try {
-		  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-		  setUser(userCredential.user);
-		} catch (error) {
-		  setError(error.message);
-		}
-	  };
+    try {
+      const { data } = await axiosClient.post('/signup', payload);
+      // setUser(data.user);
+      // setToken(data.token);
+      // navigate('/dashboard');
+      setSignupSuccess(true);
+    } catch (err) {
+      setIsSignUp(false);
+      if (err.response) {
+        setErrors(err.response.data.errors);
+      } else {
+        setErrors({ general: ["Network error. Please check your connection."] });
+      }
+    }
+  };
 
-	async function registerUser(event) {
-		event.preventDefault();
+  if (signupSuccess) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }} 
+        animate={{ opacity: 1, scale: 1 }} 
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="flex flex-col items-center justify-center h-screen -mt-10"
+      >
+        <img className="w-16 mb-4" alt="Logo" src={logo} />
+        <h1 className="text-2xl font-semibold text-[#582066]">Welcome!</h1>
+        <p className="text-gray-600 mt-2">Your account has been successfully created.</p>
+        <Link to="/login">
+          <button className="mt-5 px-6 py-2 bg-[#0c503fc9] hover:bg-[#267562c9] text-[#ddd] rounded-lg shadow-md">
+            Go to Login
+          </button>
+        </Link>
+      </motion.div>
+    );
+  }
 
-		const response = await fetch('http://localhost:8000/api/signup', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				name,
-				email,
-				phone,
-				password,
-				repassword,
-			}),
-		});
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -10 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -10 }}
+      className="super__signup"
+    >
+      <Link to="/">
+        <RiCloseFill size={41} className="fixed top-3 right-14 text-gray-500 cursor-pointer hover:text-[#582066]" />
+      </Link>
 
-		const data = await response.json();
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="super__login-header"
+      >
+        <img className="w-10" alt="Logo" src={logo} />
+        <h1 className="text-2xl font-semibold mb-4 mt-4">Sign Up</h1>
+        <p className="text-center text-gray-600">
+          Already registered? <Link to="/login"><span className="font-bold text-base">Sign In</span></Link>
+        </p>
+      </motion.div>
 
-		if (data.status === 'ok') {
-			navigate.push('/login');
-		}
-	}
-
-	return (
-		<div className="super__signup">
-			<Link to="/">
-				<RiCloseFill
-					size={41}
-					className="fixed top-3 right-14 text-gray-500 cursor-pointer hover:text-[#582066] "
-				/>
-			</Link>
-			<div className="super__login-header">
-				<h1>Sign Up</h1>
-				<p>
-					Already registered? <Link to="/login"><span className='font-bold text-base'>Sign In</span></Link>
-				</p>
-			</div>
-			{errors &&
-            <div className="alert">
-              {Object.keys(errors).map(key => (
-                <p key={key}>{errors[key][0]}</p>
+      <form className="w-full pl-10 pr-10 md:w-1/3 lg:w-1/4" onSubmit={handleSignup}>
+        {errors && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-4 w-full max-w-md rounded-md shadow-md relative"
+          >
+            <button onClick={() => setErrors(null)} className="absolute top-2 right-3 text-red-700 hover:text-red-900">
+              &times;
+            </button>
+            <h3 className="font-semibold">Oops! Something went wrong</h3>
+            <ul className="mt-2 text-sm">
+              {Object.keys(errors).map((key) => (
+                <li key={key}>• {errors[key][0]}</li>
               ))}
-            </div>
-          }
-			<div className="w-full pl-10 pr-10 md:w-1/3 lg:w-1/4">
-				<div className="relative flex items-center mt-5 mb-4 text-gray-500 focus-within:text-gray-700">
-					<RiUser3Fill size={18} className="h-5 w-5 absolute ml-3" />
-					<input
-						type="text"
-						ref={nameRef} 
-						// value={name}
-						onChange={(e) => setName(e.target.value)}
-						placeholder="Name"
-						className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
-					/>
-				</div>
-				{/* <div className="relative flex items-center mb-4 text-gray-500 focus-within:text-gray-700">
-					<RiPhoneFill size={18} className="h-5 w-5 absolute ml-3" />
-					<input
-						type="number"
-						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
-						placeholder="Phone"
-						className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full custom-number-input"
-						style={{
-							appearance: 'textfield',
-							MozAppearance: 'textfield',
-							WebkitAppearance: 'none',
-						  }}
-					/>
-				</div> */}
-				<div className="relative flex items-center mb-4 text-gray-500 focus-within:text-gray-700">
-					<RiMailFill size={18} className="h-5 w-5 absolute ml-3" />
-					<input
-						type="email"
-						ref={emailRef}
-						// value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						placeholder="Email"
-						className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
-					/>
-				</div>
-				<div className="relative flex items-center mb-4 text-gray-500 focus-within:text-gray-700">
-					<RiLockPasswordFill size={18} className="h-5 w-5 absolute ml-3" />
-					<input
-						type="password"
-						ref={passwordRef}
-						// value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						placeholder="Password"
-						className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
-					/>
-				</div>
-				<div className="relative flex items-center text-gray-500 focus-within:text-gray-700">
-					<RiLockPasswordFill size={18} className="h-5 w-5 absolute ml-3" />
-					<input
-						type="password"
-						ref={passwordConfirmationRef}
-						// value={repassword}
-						onChange={(e) => setRePassword(e.target.value)}
-						placeholder="Repeat Password"
-						className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
-					/>
-				</div>
-				{/* <div className="super__signup-form">
-					<button type="submit" onClick={registerUser} className="form-submit">
-						Sign Up
-					</button>
-				</div> */}
-				{/* <div className="super__signup-form"> */}
-				<button
-					type="submit"
-					onClick={onSubmit}
-					className=" pr-3 py-4 my-6 border bg-[#0c503fc9] text-[#ddd] border-gray-400 rounded-lg w-full"
-				>
-					Sign Up
-				</button>
-				{/* </div> */}
-				<div className="solid" />
-			</div>
+            </ul>
+          </motion.div>
+        )}
 
-			{/* <div>
-				<button type="button" className="single-sign-on">
-					<FcGoogle size={18} className="sign-on-btn" />
-					<span className="sign-on-text">Sign up with Google</span>
-				</button>
-			</div> */}
-		</div>
-	);
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.2 }}
+          className="relative flex items-center mt-5 mb-4"
+        >
+          <RiUser3Fill size={18} className="h-5 w-5 absolute ml-3 text-gray-500" />
+          <input
+            type="text"
+            ref={nameRef}
+            placeholder="Name"
+            className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full focus:border-[#582066]"
+            required
+          />
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.3 }}
+          className="relative flex items-center mb-4"
+        >
+          <RiMailFill size={18} className="h-5 w-5 absolute ml-3 text-gray-500" />
+          <input
+            type="email"
+            ref={emailRef}
+            placeholder="Email"
+            className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full focus:border-[#582066]"
+            required
+          />
+        </motion.div>
+
+        {emailError && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 -mt-2 mb-3 w-full max-w-md rounded-md shadow-md relative"
+          >
+            <button onClick={() => setEmailError(null)} className="absolute top-2 right-3 text-red-700 hover:text-red-900">
+              &times;
+            </button>
+            <p className="text-sm">{emailError}</p>
+          </motion.div>
+        )}
+
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.4 }}
+          className="relative flex items-center mb-4"
+        >
+          <RiLockPasswordFill size={18} className="h-5 w-5 absolute ml-3 text-gray-500" />
+          <input
+            type={showPassword ? "text" : "password"}
+            ref={passwordRef}
+            placeholder="Password"
+            className="pr-10 pl-10 py-2 border border-gray-400 rounded-lg w-full focus:border-[#582066]"
+            required
+          />
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 text-gray-500">
+            {showPassword ? <RiEyeOffFill size={18} /> : <RiEyeFill size={18} />}
+          </button>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.5 }}
+          className="relative flex items-center mb-4"
+        >
+          <RiLockPasswordFill size={18} className="h-5 w-5 absolute ml-3 text-gray-500" />
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            ref={passwordConfirmationRef}
+            placeholder="Confirm Password"
+            className="pr-10 pl-10 py-2 border border-gray-400 rounded-lg w-full focus:border-[#582066]"
+            required
+          />
+          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 text-gray-500">
+            {showConfirmPassword ? <RiEyeOffFill size={18} /> : <RiEyeFill size={18} />}
+          </button>
+        </motion.div>
+
+
+        <button
+          type="submit"
+          className={`mt-6 w-full py-3 rounded-lg shadow-md transition-all flex items-center justify-center ${
+            // isSignUp ? "bg-gray-400 cursor-not-allowed" : "bg-[#0c503fc9] hover:bg-[#267562c9] text-[#ddd]"
+            isSignUp ? "bg-gray-400 cursor-not-allowed" : "bg-[#0d2b36] hover:bg-[#0d2b36cb] text-[#ddd]"
+          }`}
+          disabled={isSignUp}
+        >
+          {isSignUp ? (
+            <>
+              <img src={process} className='h-5 mr-2 rounded-full' alt=''/>
+              Signing Up...
+            </>
+          ) : (
+            "Sign Up"
+          )}
+        </button>
+      </form>
+    </motion.div>
+  );
 };
 
 export default Signup;

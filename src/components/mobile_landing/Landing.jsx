@@ -1,171 +1,117 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Slider from 'react-slick';
 import { Link, useHistory } from 'react-router-dom';
-import './landing.css';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
+
 import logo from '../../assets/logo.png';
 import light from '../../assets/illustration_light.jpg';
 import phone from '../../assets/illustration_phone.jpg';
 import wallet from '../../assets/illustration_wallet.jpg';
-import {
-	Footer,
-	Header,
-	Navbar,
-	Partners,
-	Feature,
-	CTA,
-} from '../../containers';
-import { useEffect } from 'react';
+
 const MobileLanding = () => {
 	const user =
 		localStorage.getItem('loggedUser') !== 'undefined'
 			? JSON.parse(localStorage.getItem('loggedUser'))
 			: localStorage.clear();
+
 	const navigate = useHistory();
+
 	useEffect(() => {
 		if (user) {
-			navigate.push('/dashboard', { replace: true });
+			navigate('/dashboard', { replace: true });
 		}
 	}, [user]);
 
 	const settings = {
-		dots: true, // This enables the pagination dots
+		dots: true,
 		infinite: true,
-		speed: 500,
+		speed: 700,
 		slidesToShow: 1,
 		slidesToScroll: 1,
-		// autoplay: true,
-		// autoplaySpeed: 3000,
-		arrows: true, // Hide next/prev arrows for mobile
-		swipe: true, // Enable swipe gestures
-		touchMove: true, // Allow touch movement
-	  };
+		arrows: false,
+		autoplay: true,
+		autoplaySpeed: 4000,
+		swipe: true,
+		touchMove: true,
+	};
+
+	const slides = [
+		{ src: phone, title: 'Pay Bills Instantly', desc: 'Fast and secure payments from anywhere.' },
+		{ src: light, title: 'Automate & Relax', desc: 'Set it once, let us handle the rest.' },
+		{ src: wallet, title: 'Smart Wallet Control', desc: 'Top up, track, and manage with ease.' },
+	];
 
 	return (
-	<div className="main" style={{ width: '100%', overflow: 'hidden', margin: '0 auto' }}>
-		<Slider {...settings}>
-		  <div style={styles.slide}>
+		<div className="min-h-screen flex flex-col bg-gradient-to-b from-[#1f1f2e] via-[#2f2f46] to-[#3f3f5a] text-white font-sans">
+			{/* <header className="py-6 px-6 flex justify-center">
+				<img src={logo} alt="Logo" className="h-10" />
+			</header> */}
 
-			<div className='w-full flex justify-center mt-[20%]'>
-				<img src={phone} className='h-[220px] rounded-lg' alt="Slide 1" style={styles.image} />
-			</div>
-			<div className='w-full flex items-center justify-center pt-10'>
-				<h2 style={styles.heading}>Bill payments made easy!</h2>
-				</div>
-				<div className='w-full flex items-center justify-center'>
-				<p>Enjoy seamless payment experience...</p>
-			</div>
-			<div className='pt-[100px] pr-7 pl-7'>
-			<Link to="/sign-up">
-				<button
-				type="button"
-				className="w-full text-gray-500 pt-5 pb-5 bg-white hover:bg-gray-100 mb-4 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-white  dark:text-gray-500 dark:border-[#63396c] dark:hover:text-white dark:hover:bg-[#63396c] dark:focus:ring-[#63396c]"
-				>
-				Create an account
-				</button>
-				</Link>
-				<Link to="/login">
-					<button
-					type="button"
-					className="w-full text-gray-200 pt-5 pb-5 bg-[#3f1d47] hover:bg-[#63396c] focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-300 focus:z-10 dark:bg-[#3f1d47] dark:text-gray-300 dark:border-[#63396c] dark:hover:text-white dark:hover:bg-[#63396c] dark:focus:ring-[#63396c]"
-					>
-					Login
+			{/* <div className="justify-center items-center"> */}
+			<Slider {...settings}>
+				{slides.map((slide, index) => (
+					<div
+					key={index}
+					// className="flex items-center justify-center px-6 min-h-[calc(100vh-200px)]"
+				  >
+					{/* Image */}
+					<div className='flex items-center justify-center mt-24'>
+					<LazyLoadImage
+					  src={slide.src}
+					  effect="blur"
+					  alt={slide.title}
+					  className="h-60 mb-6 rounded-xl object-contain shadow-lg"
+					/>
+					</div>
+					
+					{/* Title */}
+					<h2 className="text-xl font-bold mb-2 text-center ">{slide.title}</h2>
+					{/* Description */}
+					<div className='flex items-center justify-center'>
+					<p className="text-sm text-center text-gray-300 max-w-xs ">{slide.desc}</p>
+					</div>
+				
+				  </div>
+				))}
+			</Slider>
+{/* </div> */}
+			<div className="mt-auto px-6 pb-8 space-y-4">
+				<Link to="/sign-up">
+					<button className="w-full bg-[#3f77eb] hover:bg-[#3268d6] text-white py-4 rounded-xl font-medium text-sm transition">
+						Create Account
 					</button>
 				</Link>
-			</div>
-			
-		  </div>
-  
-		  <div style={styles.slide}>
-
-			<div className='w-full flex justify-center mt-[70px]'>
-				<img src={light} className='h-[220px] rounded-lg' alt="Slide 1" style={styles.image} />
-			</div>
-			<div className='w-full flex items-center justify-center pt-[60px]'>
-				<h2 style={styles.heading}>Automate your payments!</h2>
-			</div>
-			<div className='w-full flex items-center justify-center'><p>Schedule your payments and relax...</p></div>
-			<div className='pt-[100px] pr-7 pl-7'>
-			<Link to="/sign-up">
-				<button
-				type="button"
-				className="w-full text-gray-500 pt-5 pb-5 bg-white hover:bg-gray-100 mb-4 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-white  dark:text-gray-500 dark:border-[#63396c] dark:hover:text-white dark:hover:bg-[#63396c] dark:focus:ring-[#63396c]"
-				>
-				Create an account
-				</button>
-				</Link>
 				<Link to="/login">
-					<button
-					type="button"
-					className="w-full text-gray-200 pt-5 pb-5 bg-[#3f1d47] hover:bg-[#63396c] focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-300 focus:z-10 dark:bg-[#3f1d47] dark:text-gray-300 dark:border-[#63396c] dark:hover:text-white dark:hover:bg-[#63396c] dark:focus:ring-[#63396c]"
-					>
-					Login
+					<button className="w-full border border-white text-white py-4 rounded-xl font-medium text-sm hover:bg-white hover:text-[#1f1f2e] transition">
+						Login
 					</button>
 				</Link>
+				<p className="text-center text-xs text-gray-400 pt-2">Secured by 256-bit encryption 🔒</p>
 			</div>
-			
-		  </div>
-  
-		  <div style={styles.slide}>
-
-			<div className='w-full flex justify-center mt-[20%]'>
-				<img src={wallet} className='h-[220px] rounded-lg' alt="Slide 1" style={styles.image} />
-			</div>
-			<div className='w-full flex flex-col items-center justify-center pt-10'>
-				<h2 style={styles.heading}>Manage your wallet with ease!</h2>
-				<p>Managing your wallet couldn't be easier...</p>
-			</div>
-			<div className='pt-[100px] pr-7 pl-7'>
-			<Link to="/sign-up">
-				<button
-				type="button"
-				className="w-full text-gray-500 pt-5 pb-5 bg-white hover:bg-gray-100 mb-4 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-white  dark:text-gray-500 dark:border-[#63396c] dark:hover:text-white dark:hover:bg-[#63396c] dark:focus:ring-[#63396c]"
-				>
-				Create an account
-				</button>
-				</Link>
-				<Link to="/login">
-					<button
-					type="button"
-					className="w-full text-gray-200 pt-5 pb-5 bg-[#3f1d47] hover:bg-[#63396c] focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-300 focus:z-10 dark:bg-[#3f1d47] dark:text-gray-300 dark:border-[#63396c] dark:hover:text-white dark:hover:bg-[#63396c] dark:focus:ring-[#63396c]"
-					>
-					Login
-					</button>
-				</Link>
-			</div>
-			
-		  </div>
-		</Slider>
-		
-	  </div>
-
+		</div>
 	);
 };
 
 const styles = {
 	slide: {
-	  display: 'flex',
-	  flexDirection: 'column',
-	  alignItems: 'center',
-	  justifyContent: 'center',
-	  height: '100vh',
-	  textAlign: 'center',
-	  backgroundColor: '#f0f0f0',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		height: '100vh',
+		textAlign: 'center',
+		backgroundColor: '#f0f0f0',
 	},
 	heading: {
-	  fontSize: '24px',
-	  fontWeight: 'bold',
-	  color: '#333',
-	},
-	paragraph: {
-	  fontSize: '16px',
-	  color: '#666',
-	  margin: '15px 0',
-	  padding: '0 20px',
+		fontSize: '24px',
+		fontWeight: 'bold',
+		color: '#333',
 	},
 	image: {
-	  maxWidth: '80%',
-	//   height: 'auto',
+		maxWidth: '80%',
+		objectFit: 'contain',
 	},
-  };
+};
 
 export default MobileLanding;

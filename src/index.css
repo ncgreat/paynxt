@@ -7,7 +7,7 @@
 
 	--gradient-text: linear-gradient(89.97deg, #ae67fa 1.84%, #f49867 102.67%);
 	--gradient-bar: linear-gradient(103.22deg, #ae67fa -13.86%, #f49867 99.55%);
-	--cta-gradient: linear-gradient(90deg, #ff6d26 0%, #ffaf65 100%);
+	/* --cta-gradient: linear-gradient(90deg, #0fc921 0%, #08b413 100%); */
 
 	--color-bg: #071a22;
 	--color-footer: #031b34;
@@ -26,3 +26,30 @@
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
 }
+
+
+@keyframes shimmer {
+	0% {
+	  background-position: -400px 0;
+	}
+	100% {
+	  background-position: 400px 0;
+	}
+  }
+  
+  .skeleton {
+	background: linear-gradient(90deg, #f0f0f0 25%, #e2e2e2 50%, #f0f0f0 75%);
+	background-size: 800px 100%;
+	animation: shimmer 1.5s infinite;
+  }
+
+  /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+  }
+  
+  /* Hide scrollbar for Firefox */
+  .scrollbar-hide {
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE and Edge */
+  }

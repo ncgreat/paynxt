@@ -89,7 +89,7 @@
 	width: 100%;
 	height: 0%;
 	transition: height 0.3s ease-in-out;
-	background-color: #0f3512;
+	background-color: #0d2b36;
 	border-radius: 0.25rem;
 	z-index: -6;
   }
@@ -102,6 +102,80 @@
 	height: 100%;
   }
   
+  .fund-wallet{
+	background: var(--cta-gradient);
+	border: 1px solid #0d2b36;
+  }
+
+  .or-spacer {
+	width: 85%;
+	position: relative;
+}
+
+.or-spacer .mask {
+	overflow: hidden;
+	height: 20px;
+}
+
+.or-spacer .mask::after {
+	content: '';
+	display: block;
+	margin: -25px auto 0;
+	width: 100%;
+	height: 25px;
+	border-radius: 125px / 12px;
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.or-spacer span {
+	width: 50px;
+	height: 50px;
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	transform: translate(-50%, 50%);
+	border-radius: 100%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	background: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.or-spacer span i {
+	width: 42px;
+	height: 42px;
+	border-radius: 100%;
+	border: 1px dashed #aaa;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-style: normal;
+	color: #999;
+	font-size: 14px;
+}
+
+.marquee {
+	white-space: nowrap;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.marquee p {
+	display: inline-block;
+	padding-left: 100%;
+	animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-100%);
+	}
+}
+
 
 @media screen and (max-width: 1050px) {
 	/* .wallet-info {

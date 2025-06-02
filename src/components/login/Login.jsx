@@ -1,173 +1,124 @@
-import React, { useState, useEffect, useContext, createRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { auth } from '../../services/firebase-config';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { RiUser3Fill, RiLockPasswordFill, RiCloseFill } from 'react-icons/ri';
-import { FcGoogle } from 'react-icons/fc';
+import {
+  RiUser3Fill, RiLockPasswordFill, RiCloseFill,
+  RiEyeFill, RiEyeOffFill
+} from 'react-icons/ri';
 import { DealContext } from '../../DealContext';
-import jwt_decode from 'jwt-decode';
-import {useStateContext} from "../../context/ContextProvider.jsx"
+import { useStateContext } from "../../context/ContextProvider.jsx";
 import axiosClient from "../../axios-client.js";
 import './login.css';
+import logo from '../../assets/logo.png';
+import { motion } from 'framer-motion';
+import wait from '../../assets/loading_.gif';
+import process from '../../assets/process.gif';
 
 const Login = () => {
-  // const navigate = useHistory(); // Updated for React Router v6
   const { setLoggedUser } = useContext(DealContext);
+  const { setUser, setToken } = useStateContext();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isNative, setIsNative] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [message, setMessage] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-
-  const emailRef = createRef()
-  const passwordRef = createRef()
-  const { setUser, setToken } = useStateContext()
-  const [message, setMessage] = useState(null)
+  const emailInputRef = useRef(null);
   const navigate = useHistory();
-  const onSubmit = ev => {
-    ev.preventDefault()
 
-    const payload = {
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
-    }
-    axiosClient.post('/login', payload)
-      .then(({data}) => {
-        setUser(data.user)
-        setToken(data.token);
-        // window.location.href = '/dashboard'
-        // navigate.push('/dashboard')
-        localStorage.setItem('token',  JSON.stringify(data.token));
-        localStorage.setItem('wallet',  JSON.stringify(data.wallet));
-			//  var decoded = jwt_decode(data.user);
-			// console.log(decoded);
-			// alert('Login successful');
-			// setProfile(res.data);
-      // setLoggedUser(decoded);
-			
-			localStorage.setItem('loggedUser', JSON.stringify(data.user));
-			navigate.push('/dashboard', { replace: true });
-      // fetchUserData(data.token);
-      })
-      .catch((err) => {
-        const response = err.response;
-        if (response && response.status === 422) {
-          setMessage(response.data.message)
-        }
-      })
-  }
-
-
-
-  // Detect platform
   useEffect(() => {
-    if (window.Capacitor && window.Capacitor.isNative) {
-      setIsNative(true);
-      GoogleAuth.init();
+    emailInputRef.current?.focus();
+
+    const savedName = getCookie('lastUserName');
+    const savedEmail = getCookie('lastUserEmail');
+    if (savedName && savedEmail) {
+      setUserName(savedName);
+      setEmail(savedEmail);
     }
   }, []);
 
-
-
-  // const getBaseUrl = () => {
-  //   if (window.Capacitor && window.Capacitor.isNative) {
-  //     return 'http://10.0.2.2:3080'; // Android Emulator
-  //   }
-  //   return 'http://localhost:3080'; // Web
-  // };
-
-  // Unified Login Handler
-  const handleLogin = async (method) => {
-    setLoading(true);
-    setError('');
-
-    try {
-      let idToken;
-
-      if (method === 'email') {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        idToken = await userCredential.user.getIdToken();
-      } else if (method === 'google') {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        idToken = await result.user.getIdToken();
-      }
-     
-      await fetchUserData(idToken);
-    } catch (err) {
-      setError(method === 'email' ? 'Invalid email or password!' : 'Google login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUserData = async (idToken) => {
-    try {
-      // const response = await fetch('http://192.168.0.6:3080/api/get-user-data', {
-       const response = await fetch('localhost:8000/api/get-user-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
-      });
-  
-      const data = await response.json();
-      // if (data.status === 'ok') {
-      //   localStorage.setItem('loggedUser', JSON.stringify(data.user));
-      //   navigate.push('/dashboard');
-      // } else {
-      //   setError(data.error || 'Failed to fetch user data');
-      // }
-
-       localStorage.setItem('token', data.user);
-			// localStorage.setItem('wallet', data.wallet.available_balance);
-			 var decoded = jwt_decode(data.user);
-			// console.log(decoded);
-			// alert('Login successful');
-			// setProfile(res.data);
-      // setLoggedUser(decoded);
-			
-			localStorage.setItem('loggedUser', JSON.stringify(decoded));
-			navigate.push('/dashboard', { replace: true });  
-    } catch (err) {
-      setError('Error fetching user data');
-      console.error(err);
-    }
-  };
-
-  // Fetch user data from MongoDB
-  const fetchUserData1 = async (idToken) => {
-    try {
-      const response = await fetch('http://localhost:3080/api/get-user-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
-      });
-
-      const data = await response.json();
-      // console.log(data);
-      if (data.status === 'ok') {
-        setLoggedUser(data); // Update context
-        localStorage.setItem('loggedUser', JSON.stringify(data.user));
+  useEffect(() => {
+    const encodedUser = getCookie('lastUser');
+    if (encodedUser) {
+      try {
+        const user1 = JSON.parse(atob(encodedUser));
+        setLoggedUser(user1.logged);
+        setUser(user1.logged.user);
         navigate.push('/dashboard');
-      } else {
-        setError(data.error || 'Failed to fetch user data');
+      } catch (err) {
+        console.error("Error decoding user cookie:", err);
       }
-      //localStorage.setItem('token', data.user);
-			// localStorage.setItem('wallet', data.wallet.available_balance);
-			//var decoded = jwt_decode(data.user);
-			//console.log(decoded);
-			// alert('Login successful');
-			// setProfile(res.data);
-      // setLoggedUser(decoded);
-			
-			//localStorage.setItem('loggedUser', JSON.stringify(decoded));
-			//navigate.push('/dashboard', { replace: true });  
-    } catch {
-      setError('Error fetching user data');
+    }
+    setCheckingAuth(false);
+  }, []);
+
+  const getCookie = (name) => {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  };
+
+  const validateInputs = () => {
+    const errors = {};
+    if (!email) errors.email = "Email is required";
+    else if (!/^\S+@\S+\.\S+$/.test(email)) errors.email = "Invalid email format";
+
+    if (!password) errors.password = "Password is required";
+    else if (password.length < 6) errors.password = "Password must be at least 6 characters long";
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setIsLogin(true);
+    setMessage(null);
+
+    if (!validateInputs()) {
+      setIsLogin(false);
+      return;
+    }
+
+    try {
+      const { data } = await axiosClient.post('/login', { email, password }, { withCredentials: true });
+
+      const encodedUser = btoa(JSON.stringify({ logged: data }));
+      setLoggedUser(data);
+      setUser(data.user);
+      setToken(null);
+
+      document.cookie = `lastUser=${encodedUser}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      document.cookie = `lastUserName=${encodeURIComponent(data.user.name)}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      document.cookie = `lastUserEmail=${encodeURIComponent(data.user.email)}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      localStorage.setItem("session_token", data.session_token);
+
+      navigate.push('/dashboard');
+    } catch (err) {
+      if (err.response?.status === 422) {
+        setMessage(err.response.data.message || "Invalid credentials");
+      }
+      setIsLogin(false);
     }
   };
+
+  const clearSavedUser = () => {
+    document.cookie = `lastUserName=; path=/; max-age=0`;
+    document.cookie = `lastUserEmail=; path=/; max-age=0`;
+    setUserName('');
+    setEmail('');
+  };
+
+  if (checkingAuth || loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <img src={wait} alt="Loading..." className="h-16" />
+      </div>
+    );
+  }
 
   return (
     <div className="super__login">
@@ -177,57 +128,117 @@ const Login = () => {
           className="fixed top-3 right-14 text-gray-500 cursor-pointer hover:text-[#4f6b2a7c]"
         />
       </Link>
+
       <div className="super__login-header">
+        <img className="w-10" alt="logo" src={logo} />
         <h1>Sign In</h1>
-        {/* <p>
-          Not registered?{' '}
-          <Link to="/sign-up">
-            <span className="font-bold text-base">Sign Up</span>
-          </Link>
-        </p> */}
-         {message &&
-            <div className="alert">
-              <p>{message}</p>
-            </div>
-          }
+        {!userName && (
+          <p>
+            Not registered?{' '}
+            <Link to="/signup">
+              <span className="font-bold text-base">Sign Up</span>
+            </Link>
+          </p>
+        )}
       </div>
 
-      <div className="w-full pl-10 pr-10 md:w-1/3 lg:w-1/4">
-        <div className="relative flex items-center mt-5 mb-4 text-gray-500 focus-within:text-gray-700">
-          <RiUser3Fill size={18} className="h-5 w-5 absolute ml-3" />
+      <form onSubmit={onSubmit} className="w-full pl-10 pr-10 md:w-1/3 lg:w-1/4">
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-4 rounded-md shadow-md relative"
+          >
+            <button
+              onClick={() => setMessage(null)}
+              type="button"
+              className="absolute top-2 right-3 text-red-700 hover:text-red-900"
+            >
+              &times;
+            </button>
+            <h3 className="font-semibold">Oops! Something went wrong</h3>
+            <p className="text-sm">{message}</p>
+          </motion.div>
+        )}
+
+        {userName ? (
+          <div className="mb-4 text-gray-800 mt-2 border-t border-t-gray-500 rounded-xl p-3">
+            <p>Welcome back, <strong>{userName}</strong></p>
+            <p>Please confirm your password to access your account.</p>
+            <button onClick={clearSavedUser} type="button" className="text-sm border p-2 rounded-lg text-red-800 mt-2">Not you?</button>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="relative flex items-center mb-4"
+          >
+            <RiUser3Fill size={18} className="h-5 w-5 absolute ml-3 text-gray-500" />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              ref={emailInputRef}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
+              required
+            />
+          </motion.div>
+        )}
+
+        {errors.email && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-100 text-red-700 p-2 -mt-2 rounded-md">
+            <p>{errors.email}</p>
+          </motion.div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="relative flex items-center mb-4"
+        >
+          <RiLockPasswordFill size={18} className="h-5 w-5 absolute ml-3 text-gray-500" />
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            ref={emailRef}
-            onChange={(e) => setEmail(e.target.value)}
-            className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
-          />
-        </div>
-        <div className="relative flex items-center mt-5 mb-4 text-gray-500 focus-within:text-gray-700">
-          <RiLockPasswordFill size={18} className="h-5 w-5 absolute ml-3" />
-          <input
-            type="password"
-            placeholder="Password"
+            type={showPassword ? "text" : "password"}
             value={password}
-            ref={passwordRef}
             onChange={(e) => setPassword(e.target.value)}
-            className="pr-3 pl-10 py-2 border border-gray-400 rounded-lg w-full"
+            placeholder="Password"
+            className="pr-10 pl-10 py-2 border border-gray-400 rounded-lg w-full focus:border-[#582066]"
+            required
           />
-        </div>
-        {/* {error && <p style={{ color: 'red' }}>{error}</p>} */}
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 text-gray-500">
+            {showPassword ? <RiEyeOffFill size={18} /> : <RiEyeFill size={18} />}
+          </button>
+        </motion.div>
+
+        {errors.password && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-100 text-red-700 p-2 -mt-2 rounded-md">
+            <p>{errors.password}</p>
+          </motion.div>
+        )}
+
         <button
           type="submit"
-          className="pr-3 py-4 my-3 border bg-[#0c503fc9] text-[#ddd] border-gray-400 rounded-lg w-full"
-          // onClick={() => handleLogin('email')}
-          onClick={onSubmit}
-          disabled={loading}
+          className={`mt-6 w-full py-3 rounded-lg shadow-md flex items-center justify-center transition-all ${isLogin ? "bg-gray-400 cursor-not-allowed" : "bg-[#0d2b36] hover:bg-[#0d2b36cb] text-[#ddd]"}`}
+          disabled={isLogin}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {isLogin ? (
+            <>
+              <img src={process} className='h-5 mr-2 rounded-full' alt="loading" />
+              Logging in...
+            </>
+          ) : "Login"}
         </button>
 
-       
-      </div>
+        <p className="mt-4">
+          Forgot password?{' '}
+          <Link to="/forgot-password">
+            <span className="text-[#071a22]">Click here</span>
+          </Link>
+        </p>
+      </form>
     </div>
   );
 };

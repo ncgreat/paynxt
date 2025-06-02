@@ -5,6 +5,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { DealProvider } from './DealContext';
 import App from './App.jsx';
 import './index.css';
+import './borderless.css';
 // import 'react-loading-skeleton/dist/skeleton.css';
 
 

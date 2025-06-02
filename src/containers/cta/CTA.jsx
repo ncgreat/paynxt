@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LuCreditCard, LuHeadphones } from 'react-icons/lu';
 // import { BsPhoneFill } from 'react-icons/bs';
@@ -9,9 +9,13 @@ import {
 	MdSmartphone,
 	MdOutlineCardGiftcard,
 } from 'react-icons/md';
+
 import { IoTicketOutline } from 'react-icons/io5';
 import './cta.css';
 const CTA = () => {
+
+	  const navigate = useHistory();
+
 	return (
 		<div className="super__cta-feature">
 			<div className="super__cta-feature-content">
@@ -38,59 +42,27 @@ const CTA = () => {
 						visible: { opacity: 1 },
 						hidden: { opacity: 0 },
 					}}
-					className="super__cta-featured"
+					className="super__cta-featured flex items-center justify-center"
 				>
-					<div className="featured_cta-content">
-						<MdSmartphone size={32} className="cta__icon" />
-						<h2>Airtime Purchase</h2>
+					<div className='bg-[#054872] p-5 rounded-lg w-[80%] py-6'>
+						<p className='text-[#0EADBF] text-xs uppercase text-left'>Try it now</p>
+						<div className='flex'>
+							<h2 className='text-2xl text-white'>Ready to level up?</h2>
+							<div className='mt-1'>
+								<Link to="/login">
+									<span className="p-3 bg-[#0EADBF] text-[#ddd] rounded-md px-3 mx-3">Get Started Now</span>
+								</Link>
+							</div>
+							
+							{/* <button
+								onClick={navigate.push('/login')}
+							 	className="p-2 bg-[#0EADBF] text-[#ddd] rounded-md px-3 mx-3"
+							>
+								Get Started Now
+							</button> */}
+							{/* <button className="p-2 border border-[#0EADBF] rounded-md text-[#ddd]">Learn More</button> */}
+						</div>
 					</div>
-					<div className="featured_cta-content">
-						<MdPhoneAndroid size={32} className="cta__icon" />
-						<h2>Data Purchase</h2>
-					</div>
-					<div className="featured_cta-content">
-						<IoTicketOutline size={32} className="cta__icon" />
-						<h2>Betting</h2>
-					</div>
-					<div className="featured_cta-content">
-						<MdScreenshotMonitor size={35} className="cta__icon" />
-						<h2>TV Subscription</h2>
-					</div>
-					<div className="featured_cta-content">
-						<MdElectricBolt size={32} className="cta__icon" />
-						<h2>Electricity Bills</h2>
-					</div>
-					<div className="featured_cta-content">
-						<MdOutlineCardGiftcard size={32} className="cta__icon" />
-						<h2>Gift Cards</h2>
-					</div>
-				</motion.div>
-				<motion.div
-					initial="hidden"
-					whileInView="visible"
-					transition={{ duration: 1.2 }}
-					variants={{
-						visible: { opacity: 1 },
-						hidden: { opacity: 0 },
-					}}
-					className="super__cta_trynow"
-				>
-					<Link to="/login" className="try-now">
-						<button type="button">
-							Try now
-							<LuCreditCard
-								size={16}
-								color="#f4eff6"
-								className="animate-pulse"
-							/>
-						</button>
-					</Link>
-					<Link to="/login" className="support">
-						<button type="button">
-							Customer support
-							<LuHeadphones size={16} color="#5A6475" />
-						</button>
-					</Link>
 				</motion.div>
 			</div>
 		</div>

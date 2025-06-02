@@ -13,41 +13,51 @@ import ikeja from '../../assets/ikeja-logo.svg';
 import eko from '../../assets/eko-logo.svg';
 import bedc from '../../assets/bedc-logo.svg';
 import abuja from '../../assets/abuja-logo.svg';
+import wakanow from '../../assets/wakanow.png';
+import amadeus from '../../assets/amadeus.png';
+import coralpay from '../../assets/coralpay.png';
+import paystack from '../../assets/paystack.png';
+import google from '../../assets/google.png';
+import google1 from '../../assets/google1.png';
 import kaduna from '../../assets/kaduna-logo.svg';
 import Ticker from 'framer-motion-ticker';
 import './partners.css';
 const Partners = () => {
 	const logos = [
-		bedc,
 		glo,
 		gotv,
+		google,
 		airtel,
-		smile,
-		bet9ja,
-		etisalat,
+		amadeus,
+		// bet9ja,
+		// etisalat,
 		dstv,
-		xbet,
+		// xbet,
 		ikeja,
 		kaduna,
+		coralpay,
 		mtn,
-		betway,
 		abuja,
+		paystack,
 		eko,
-		sportybet,
+		// sportybet,
+		wakanow,
 	];
 	return (
 		<div className="super__partner">
 			<div className="super__partner-content">
-				<div className="super__partner-header">
-					<h2>Our Partners</h2>
+			<div className='flex flex-col items-center justify-center'>
+				<div className='w-60 border border-gray-300 border-b-0 rounded-full mb-3 shadow-md'>
+				<h4 className='text-gray-700 text-center shadow-sm p-4'><span className='partners'>Our Trusted Partners</span></h4>
 				</div>
+			
 				<div className="super__partner-logos">
 					<Ticker duration={65}>
 						{logos.map((item, index) => (
 							<img
 								key={index}
 								src={item}
-								className="ticker-logos rounded"
+								className="ticker-logos rounded-lg"
 								style={{
 									margin: '0 80px',
 									width: '100px',
@@ -56,6 +66,7 @@ const Partners = () => {
 							/>
 						))}
 					</Ticker>
+				</div>
 				</div>
 			</div>
 		</div>

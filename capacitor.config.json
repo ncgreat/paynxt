@@ -12,12 +12,12 @@
               "profile",
               "email"
           ],
-          "serverClientId": "123447036196-f8efue0dlgapdjc04a5lhldm2bl81mlb.apps.googleusercontent.com",
+          "serverClientId": "",
           "forceCodeForRefreshToken": false
       }
   },
-  "appId": "com.megadeals.app",
-  "appName": "Megadeals",
+  "appId": "",
+  "appName": "",
   "webDir": "dist",
   "server": {
       "androidScheme": "https"

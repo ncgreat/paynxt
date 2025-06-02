@@ -1,0 +1,54 @@
+{
+    "foods": [
+      {
+        "id": 1,
+        "category": "Main dishes",
+        "name": "Pepperoni Pizza",
+        "image": "https://atsloanestable.com/wp-content/uploads/2023/06/new-york-style-pizza2.jpg",
+        "price": 3500
+      },
+      {
+        "id": 2,
+        "category": "Main dishes",
+        "name": "Cheese Pizza",
+        "image": "https://www.recipetineats.com/tachyon/2023/05/Garlic-cheese-pizza_9.jpg",
+        "price": 5500
+      },
+      {
+        "id": 3,
+        "category": "Snacks",
+        "name": "Beef Burger",
+        "image": "https://simplehomeedit.com/wp-content/uploads/2024/03/Homemade-Beef-Burgers-4.webp",
+        "price": 2000
+      },
+      {
+        "id": 4,
+        "category": "Snacks",
+        "name": "Chicken Burger",
+        "image": "https://simplehomeedit.com/wp-content/uploads/2022/09/Southern-Fried-Chicken-Burger-1.webp",
+        "price": 2500
+      },
+      {
+        "id": 5,
+        "category": "Salads",
+        "name": "Caesar Salad",
+        "image": "https://www.grocery.coop/sites/default/files/NCG_Dennis_Becker_Classic_Caesar_Salad_715_x_477.jpg",
+        "price": 600
+      },
+      {
+        "id": 6,
+        "category": "New",
+        "name": "Vegan Bowl",
+        "image": "https://thealmondeater.com/wp-content/uploads/2022/05/vegan-burrito-bowl_web-3.jpg.webp",
+        "price": 5000
+      },
+      {
+        "id": 4,
+        "category": "Snacks",
+        "name": "Cheese Burger",
+        "image": "https://www.sargento.com/assets/Uploads/Recipe/Image/burger_0__FocusFillWyIwLjAwIiwiMC4wMCIsMTEwMCw2NTdd.jpg",
+        "price": 1500
+      }
+    ]
+  }
+  

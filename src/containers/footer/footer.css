@@ -9,7 +9,7 @@
 }
 
 .subscribebtn {
-	background: #582066 !important;
+	background: #000000 !important;
 	color: #eeefef;
 	width: 100%;
 	border-radius: 8px;
@@ -78,10 +78,10 @@
 
 @media screen and (max-width: 550px) {
 	.super__footer{
-		display: none;
+		/* display: none; */
 	}
 	.copy{
-		display: none;
+		/* display: none; */
 	}
 	.footer_content {
 		line-height: 25px;

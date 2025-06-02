@@ -1,0 +1,154 @@
+.super__login {
+	display: flex;
+	flex-direction: column;
+	/* margin-top: 8%; */
+
+	background: #071a22;
+	height: 100vh;
+}
+
+.super__login-container{
+	width: 95%;
+	height:95%;
+	/* border: 1px solid #ddd; */
+	margin: 3% auto;
+	/* background: #071a22; */
+	/* background: radial-gradient(
+		circle at 50% 5%,
+		rgb(45, 145, 221) 10%,
+		rgb(38, 118, 179) 42%
+	); */
+	background: #fff;
+	/* background-image: url('../../assets/Mesh.png'); */
+	background-blend-mode:lighten;
+	background-size: cover;
+	align-items: center;
+	justify-content: center;
+}
+
+.login-form{
+
+	/* margin: 15px; */
+    width: 30%;
+    border:1px solid #ddd;
+	margin: 1% auto;
+	border-radius: 15px;
+}
+
+.super__login-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	place-items: center;
+	justify-content: center;
+}
+
+.super__login-header h1 {
+	font-size: 24px !important;
+	/* font-weight: 600; */
+	color: #071a22 !important;
+	
+}
+
+.super__login-header img{
+	width: 100px;
+	margin-top: 4%;
+}
+
+.super__login-header p {
+	margin: 5px;
+	color: #071a22 !important;
+}
+/* .super__login-form {
+	margin: 15px;
+	width: 50%;
+	border:1px solid #ddd;
+} */
+
+.super__login-form1 input {
+	padding: 0.6rem;
+	border: 1px solid #ddd;
+	margin: 8px;
+	border-radius: 5px;
+	background: #312E47 !important;
+}
+
+button.form-submit1 {
+	/* padding: 0.6rem; */
+	border: none !important;
+	background: #193164 !important;
+	border-radius: 25px !important;
+	color: #f4eff6;
+}
+
+.super__login-form input:focus {
+	/* border: none; */
+}
+
+.solid {
+	width: 19%;
+}
+
+.single-sign-on {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	border: 1px solid #ddd;
+	padding: 0.7rem 3.8rem;
+	border-radius: 10px;
+}
+
+.sign-on-btn {
+	margin-top: 4px;
+}
+
+.sign-on-text {
+	margin-left: 1.8rem;
+}
+
+@media screen and (max-width: 1050px) {
+	.super__login-form {
+		align-items: center;
+		width: 33.3%;
+	}
+
+	.super__login-form button {
+		width: 100%;
+		padding: 10px 25%;
+	}
+}
+
+@media screen and (max-width: 767px) {
+	.login-form {
+		width: 50%;
+		/* display: none; */
+	}
+	
+
+	.login-form button {
+		padding: 10px 15%;
+	}
+
+	.single-sign-on {
+	}
+}
+
+@media screen and (max-width: 637px) {
+	.login-form {
+		width: 37%;
+	}
+}
+
+@media screen and (max-width: 550px) {
+	.login-form {
+		width: 90%;
+	}
+	.super__google-form {
+		width: 50%;
+	}
+
+	.sign-on-text {
+		font-size: 13px;
+		margin: 0;
+	}
+}

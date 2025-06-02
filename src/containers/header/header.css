@@ -1,9 +1,10 @@
+
 .super__header {
-	display: flex;
+	/* display: flex;
 	flex-direction: row;
 	margin: 25px;
 	background-image: url('../../assets/Mesh.png');
-	animation: mymove 25s infinite;
+	animation: mymove 25s infinite; */
 }
 
 @keyframes mymove {
@@ -12,47 +13,51 @@
 	}
 }
 
+.animate-delay-500 {
+	animation-delay: 2s;
+}
+
 .super__header-content {
-	display: flex;
-	flex-direction: row;
+	/* display: flex;
+	flex-direction: row; */
 	justify-content: center;
 	place-items: center;
 	/* width: 100%; */
 	padding: 0 20%;
-	margin: 85px;
+	/* margin: 85px; */
 }
 
 .super__header-content h1 {
 	font-family: var(--font-family);
 	font-weight: 500;
-	font-size: 62px;
+	/* font-size: 62px; */
 	line-height: 70px;
 	text-align: center;
-	margin: 20px;
+	/* margin: 20px; */
 	/* letter-spacing: -0.04em; */
 	color: #121417;
-	text-shadow: 1px 1px 2px #582066;
+	text-shadow: 1px 1px 1px #303641;
 }
 
 .super__header-content h3 {
-	font-family: var(--font-family);
-	/* padding: 0 15%; */
 	text-align: center;
+	font-size: 36px;
+	font-weight: 100;
+	line-height: 45px;
+
 	/* letter-spacing: -0.04em; */
-	color: #582066;
+	/* color: #582066; */
 }
 
 .super__header-content button {
 	font-family: var(--font-family);
 	display: flex;
-	/* flex-direction: row; */
-	margin: 0 auto;
-	/* letter-spacing: -0.04em; */
-	background: #582066;
+	/* margin: 0 auto; */
+	background: #000;
 	color: white;
 	padding: 0.7em;
-	border-radius: 5px;
-	gap: 4px;
+	/* border-radius: 5px; */
+	/* gap: 4px; */
 }
 
 .getaccess__icon {

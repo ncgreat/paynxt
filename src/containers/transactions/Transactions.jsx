@@ -1,222 +1,258 @@
 import { DealContext } from '../../DealContext';
 import { motion } from 'framer-motion';
-import { RiCheckboxCircleFill, RiCloseCircleFill } from 'react-icons/ri';
-import { useEffect, useState, useContext } from 'react';
+import { RiCheckboxCircleFill } from 'react-icons/ri';
+import React,{ useEffect, useState, useContext, useRef } from 'react';
+import { ChevronDown } from "lucide-react";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 import './transactions.css';
-const Transactions = ({ user }) => {
-	const [isLoaded, setIsLoaded] = useState(false);
-	const [userTransactions, setUserTransactions] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-	const [loading, setLoading] = useState(true);
-	const { balance, resetBalance, updateBalance  } = useContext(DealContext);
-	// console.log(userTransactions);
-	const getTransactions = async () => {
-		setLoading(true);
-		try {
-			const response = await fetch(`http://localhost:8000/api/get_transactions?page=${currentPage}&limit=5`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					_id: user.id,
-				}),
-			});
-			const data = await response.json();
-			setUserTransactions(data.transactions);
-			// console.log(data.transactions);
-			if(JSON.stringify(data.transactions) !== "[]"){
-				setTotalPages(data.totalPages);
-			}else{
-				setTotalPages(0);
-			}
-			
-			// console.log(data);
-			setLoading(false);
-		
-		} catch (error) {
-			console.error("Error fetching transactions:", error);
-			setLoading(false);
-		}
-	};
 
-	const handlePageChange = (page) => {
-        setCurrentPage(page);
+const Transactions = ({ user }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [userTransactions, setUserTransactions] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const { updateBalance } = useContext(DealContext);
+  const [showDetails, setShowDetails] = useState(false);
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const hasInitialized = useRef(false);
+  // Safely accessing user
+  user = user?.user;
+
+  const getBaseUrl = () => {
+    return `${import.meta.env.VITE_API_BASE_URL}/api`;
+  };
+
+  const [expandedOrder, setExpandedOrder] = useState(null);
+
+  const toggleTransDetails = (transId) => {
+    setIsModalOpen(true);
+    userTransactions.map((trans) => {
+      if (trans.id === transId) {
+        setShowDetails(!showDetails);
+        setExpandedOrder(expandedOrder === transId ? null : transId);
+        // console.log(trans);
+        setSelectedTransactions([...selectedTransactions, trans]);
+      }
+    })
+  };
+
+    useEffect(() => {
+      // Centralized modal cleanup logic
+      if (!isModalOpen) {
+        resetModalStates(); // Reset all modal-related states
+      }
+  
+      }, [isModalOpen]);
+  
+      const resetModalStates = () => {
+        setShowDetails(false);
+        setSelectedTransactions([]);
+      }
+
+  const getTransactions = async () => {
+    setLoading(true);
+    try {
+      // const response = await fetch(`${getBaseUrl()}/get_transactions?page=${currentPage}&limit=5`, {
+			const response = await fetch(`${getBaseUrl()}/get_transactions?page=${currentPage}&limit=5`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: user?.id,
+        }),
+      });
+
+      const data = await response.json();
+      setUserTransactions(data.transactions || []);
+      setTotalPages(data.totalPages || 0);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    if (hasInitialized.current) return;
+		hasInitialized.current = true;
+    if (user?.id) {
+      getTransactions();
+    }
+  }, [currentPage, updateBalance, user?.id]);
+  
+
+    	// Function to format the price as currency
+    const formatPrice = price => {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 0
+        }).format(price);
+    };
+  
+
+  const TimestampFormatter = ({ timestamp }) => {
+    const formatTimestamp = (timestamp) => {
+      const date = new Date(timestamp);
+
+      // Extract date and time components
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const year = date.getFullYear();
+
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+
+      return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     };
 
-	useEffect(() => {
+    return <div>{formatTimestamp(timestamp)}</div>;
+  };
 
-			getTransactions();
-			// setIsLoaded(false);
-			setLoading(false);
-
-	}, [currentPage, updateBalance]);
-
-	// useEffect(() => {
-	// 	getTransactions();
-	// 	// setIsLoaded(true);
-	// }, [user, currentPage, balance]);
-
-	const TimestampFormatter = ({ timestamp }) => {
-		const formatTimestamp = (timestamp) => {
-		  const date = new Date(timestamp);
-	  
-		  // Extract date and time components
-		  const day = String(date.getDate()).padStart(2, "0");
-		  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-		  const year = date.getFullYear();
-	  
-		  const hours = String(date.getHours()).padStart(2, "0");
-		  const minutes = String(date.getMinutes()).padStart(2, "0");
-		  const seconds = String(date.getSeconds()).padStart(2, "0");
-		  const milliseconds = String(date.getMilliseconds()).padStart(2, "0").slice(0, 2); // Format milliseconds as 2 digits
-	  
-		  // Format as dd/MM/yyyy HH:mm:ss.SS
-		  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-		};
-	  
-		return <div>{formatTimestamp(timestamp)}</div>;
-	  };  
-
-	return (
-		<div className="super__feature overflow-hidden">
-			<div className="ml-5">
-				<div className="mb-3">
-					<motion.div
-						initial="hidden"
-						whileInView="visible"
-						transition={{ duration: 1.5 }}
-						variants={{
-							visible: { opacity: 1, translateX: 0 },
-							hidden: { opacity: 0, translateX: 200 },
-						}}
-						className="ml-[30px] mt-5 lg:ml-[75px]"
-					>
-						<h3 className="text-bold">Recent Transactions</h3>
-					</motion.div>
-				</div>
-			</div>
-			<div className="mx-3 mb-10 lg:mx-[95px]">
-				<motion.div
-					initial="hidden"
-					whileInView="visible"
-					transition={{ duration: 0.8 }}
-					variants={{
-						visible: { opacity: 1 },
-						hidden: { opacity: 0 },
-					}}
-					className="overflow-hidden rounded-lg"
-				>
-					<table className="styled-table text-[13px] lg:text-[14px]">
-						<thead>
-							<tr className="text-[12px] lg:text-[14px]">
-								<th className="pr-4 sm:pr-0 " width="5%"> </th>
-								<th width="20%">
-									<span className="m-5">Service</span>
-								</th>
-								<th width="15%">Amount</th>
-								<th width="45%" className="hidden sm:flex">Transaction ID</th>
-								<th width="15%">Status</th>
-							</tr>
-						</thead>
-						{JSON.stringify(userTransactions) !== "[]" ? (
-							<tbody>
-								 {loading ? (
-									Array.from({ length: 5 }).map((_, index) => (
-										<tr key={index}>
-											<td>
-													<Skeleton />
-											</td>
-											<td>
-												<div className="table-col pl-5">
-													<Skeleton />
-													<Skeleton />
-												</div>
-											</td>
-
-											<td>
-												<div className="table-col">
-													<Skeleton />
-													<Skeleton />
-												</div>
-											</td>
-											<td className="hidden sm:flex"><Skeleton /></td>
-											<td>
-												<div className="table-col">
-													<Skeleton />
-													<Skeleton />
-												</div>
-											</td>
-										</tr>
-									))
-									) : (
-								 userTransactions.map(transaction => (
-									<tr key={transaction.id}>
-									<td>
-										<RiCheckboxCircleFill
-											size={16}
-											className="transaction__icon-success"
-										/>
-									</td>
-									<td>
-										<div className="table-col pl-5">
-											<span className="text-bold">{transaction.service}</span>
-											<span>{transaction.phone_num}</span>
-										</div>
-									</td>
-
-									<td>
-										<div className="table-col">
-											<span className="text-bold">{transaction.amount}</span>
-											<span className='text-[12px]'>NGN</span>
-										</div>
-									</td>
-									<td className="hidden sm:flex">{transaction.transaction_id}</td>
-									<td>
-										<div className="table-col">
-											<span className="text-bold">Completed</span>
-											<TimestampFormatter timestamp={transaction.created_at} />
-										</div>
-									</td>
-								</tr>
-								))
-							)}
-							</tbody>
-						) : (
-							<tbody>
-								<tr>
-									<td colSpan="5" className="text-center">
-										<span className="w-full p-5">No Transactions</span>
-									</td>
-								</tr>
-							</tbody>
-						)}
-					</table>
-					<div>
-					{JSON.stringify(userTransactions) !== "[]" ? (
-						Array.from({ length: totalPages }, (_, index) => (
-							<button
-								key={index}
-								onClick={() => handlePageChange(index + 1)}
-								disabled={currentPage === index + 1}
-								// className='p-2 mr-3 mt-2 bg-[#ddd] '
-								className='page'
-							>
-								{index + 1}
-							</button>
-						))
-					):(
-						<div></div>
-					)}
-					</div>
-				</motion.div>
-			</div>
-		</div>
-	);
+  return (
+    <div className="super__feature overflow-hidden">
+      <div className="ml-5">
+        <div className="mb-3">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1.5 }}
+            variants={{
+              visible: { opacity: 1, translateX: 0 },
+              hidden: { opacity: 0, translateX: 200 },
+            }}
+            className="ml-[30px] mt-5 lg:ml-[75px]"
+          >
+            <h3 className="text-bold">Recent Transactions</h3>
+          </motion.div>
+        </div>
+      </div>
+      <div className="mx-3 mb-10 lg:mx-[95px]">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          transition={{ duration: 0.8 }}
+          variants={{
+            visible: { opacity: 1 },
+            hidden: { opacity: 0 },
+          }}
+          className="overflow-hidden rounded-lg"
+        >
+          <table className="styled-table text-[13px] lg:text-[14px]">
+            <thead>
+              <tr className="text-[12px] lg:text-[14px]">
+                <th className="pr-4 sm:pr-0" width="5%"> </th>
+                <th width="15%"><span className="m-5">Service</span></th>
+                <th width="15%">Amount</th>
+                <th width="40%" className="hidden sm:flex">Transaction ID</th>
+                <th width="15%">Status</th>
+                <th ></th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={index}>
+                    <td><Skeleton /></td>
+                    <td><Skeleton /></td>
+                    <td><Skeleton /></td>
+                    <td className="hidden sm:flex"><Skeleton /></td>
+                    <td><Skeleton /></td>
+                  </tr>
+                ))
+              ) : userTransactions.length > 0 ? (
+                userTransactions.map((transaction) => (
+                  <React.Fragment key={transaction.id}>
+                  <tr key={transaction.id}  onClick={() => toggleTransDetails(transaction.id)} className='cursor-pointer'>
+                    <td>
+                      <RiCheckboxCircleFill size={16} className="transaction__icon-success" />
+                    </td>
+                    <td>
+                      <div className="table-col pl-5">
+                        <span className="text-bold">{transaction.service}</span>
+                        <span>{transaction.phone_num}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="table-col">
+                        <span className="text-bold">{transaction.amount}</span>
+                        <span className="text-[12px]">NGN</span>
+                      </div>
+                    </td>
+                    <td className="hidden sm:flex">{transaction.transaction_id}</td>
+                    <td>
+                      <div className="table-col">
+                        <span className="text-bold">Completed</span>
+                        <TimestampFormatter timestamp={transaction.created_at} />
+                      </div>
+                    </td>
+                    <td className="p-3">
+                    {/* <button
+                      className={`text-gray-600 hover:text-gray-900 transition-transform ${expandedOrder === transaction.id ? "rotate-180" : "rotate-0"}`}
+                      onClick={() => toggleTransDetails(transaction.id)}
+                    >
+                      <ChevronDown size={20} />
+                    </button> */}
+                  </td>
+                  </tr>
+                   <tr>
+                   <td colSpan="5" className="p-0">
+                     <div className={`transition-all duration-[1s,15s] ease-in-out overflow-hidden 
+                       ${expandedOrder === transaction.id ? "max-h-[500px] opacity-100 p-4 bg-gray-50 text-gray-600" : "max-h-0 opacity-0 p-0"}`}>
+                       {expandedOrder === transaction.id && (
+                         <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <h3 className="text-bold text-[#101c50]">Transaction Details</h3>
+                              </div>
+                           <p><strong>Recipient:</strong> {transaction.phone_num}</p>
+                           <p><strong>Service:</strong> {transaction.service}</p>
+                           <p><strong>Transaction ID:</strong> {transaction.transaction_id}</p>
+                           <p><strong>Amount:</strong> ₦{formatPrice(transaction.amount)}</p>
+                           <p><strong>Date|Time:</strong> <TimestampFormatter timestamp={transaction.created_at} /></p>
+                                                     
+                         </div>
+                       )}
+                     </div>
+                   </td>
+                 </tr>
+                 </React.Fragment>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center">
+                    <span className="w-full p-5">No Transactions</span>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          {totalPages > 1 && (
+            <div className="pagination">
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  disabled={currentPage === index + 1}
+                  className="page"
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      </div>
+      
+    </div>
+  );
 };
 
 export default Transactions;

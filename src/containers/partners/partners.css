@@ -7,7 +7,7 @@
 	display: flex;
 	flex-direction: column;
 	/* justify-content: space-between; */
-	width: 100%;
+	width: 72%;
 	/* padding: 0 25%; */
 	margin: 0 auto;
 }
@@ -39,14 +39,17 @@
 	border: 1px solid rgba(255, 255, 255, 0.18);
 	padding: 10px;
 }
+.partners{
+	text-shadow: 1px 1px 1px #5d6166;
+}
 
 .super__partner-header {
-	display: flex;
+	/* display: flex;
 	flex-direction: row;
 	margin: 0 auto;
 	text-align: center;
 	font-weight: 600;
-	font-size: 1.4rem;
+	font-size: 1.4rem; */
 }
 
 .super__partner-header h2 {
