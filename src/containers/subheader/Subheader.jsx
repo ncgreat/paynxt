@@ -1,27 +1,56 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { MdArrowBack } from "react-icons/md";
 import { DealContext } from '../../DealContext';
+import { Button } from "../../components/ui/";
+import { CreditCard } from "lucide-react";
 
-const Subheader = (title) => {
+const Subheader = ({ title, subtitle, onBack }) => {
   const history = useHistory();
-  const {setViewMore} = useContext(DealContext);
-//  console.log(title.title);
-  return (
-    <div className="p-4 bg-[#f4eff6] border border-gray-200 shadow-sm 
-    sticky top-0 z-50">
-        <div className='flex pl-2'>
-        <button 
-            onClick={() => {history.goBack(); setViewMore(false)}} 
-            className='border border-gray-400 rounded-md shadow-md p-2'>
-            <MdArrowBack />
-        </button>
-        <h3 className="font-semibold pl-3 mt-1 text-[#868686]">{title?.title }</h3>
-        </div>
-       
-    </div>
-    
-  )
-}
+  const { setViewMore, parentMenu } = useContext(DealContext);
 
-export default Subheader
+  const handleBack = () => {
+    if (onBack) {
+      onBack(); // delegate to parent component
+    } else {
+      // fallback to default navigation
+      if (parentMenu === 'bills') {
+        history.push('/bills');
+      } else if (parentMenu === 'foods') {
+        history.push('/foods');
+      } else if (parentMenu === 'groceries') {
+        history.push('/groceries');
+      } else {
+        // console.log(parentMenu);
+        history.push('/dashboard');
+        // history.goBack('/dashboard');
+        // window.location.reload();
+      }
+      setViewMore(false);
+    }
+  };
+
+  return (
+    <div className="p-4 bg-[#f8f7f8] border border-gray-200 shadow-sm sticky top-0 z-50">
+      <div className="flex items-center justify-between">
+        <button 
+          onClick={handleBack} 
+          className="border border-gray-200 rounded-md shadow-md p-2"
+        >
+          <MdArrowBack />
+        </button>
+        <div className="flex items-center">
+          <div className="flex flex-col items-center">
+            <h3 className="font-semibold mt-1 text-[#868686]">{title}</h3>
+            <p className="text-emerald-500 text-sm">{subtitle}</p>
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+          <CreditCard className="w-5 h-5" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default Subheader;

@@ -6,6 +6,10 @@ import axios from "axios";
 import { DealContext } from "../../DealContext";
 import fallbackImage from "../../assets/placeholder.webp"; // ✅ Fallback image
 import echo from '../../echo'; 
+import { FiMapPin } from "react-icons/fi";
+import { MdGpsFixed } from "react-icons/md";
+import tea from "../../assets/tea_make.webp"; 
+
 
 
 const GrocStores = () => {
@@ -27,6 +31,7 @@ const GrocStores = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [selectedStore, setSelectedStore] = useState(null);
+     const [manualAddress, setManualAddress] = useState('');
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -55,9 +60,65 @@ const GrocStores = () => {
     return match ? decodeURIComponent(match[2]) : null;
   };
 
+  const retryGetLocation = () => {
+  getBrowserLocation();
+};
+
+    const getBrowserLocation = () => {
+      if (!navigator.geolocation) {
+        setLocationError("Geolocation is not supported by this browser.");
+        getIPFallback();
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          console.log("Current Position:", { latitude, longitude }); // ✅ Console log here
+          setUserCoords({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.warn("Browser GPS failed:", error.message);
+          setLocationError("Using fallback location via IP.");
+          getIPFallback();
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    };
+  
+    const getIPFallback = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        if (data && data.latitude && data.longitude) {
+          setUserCoords({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) });
+        } else {
+          setLocationError("IP location service failed.");
+        }
+      } catch (err) {
+        console.error("IP fallback error:", err.message);
+        setLocationError("Failed to retrieve location by all means.");
+      }
+    };
+
   const formatPrice = (price) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(price);
 
+  const inputRef = useRef();
+  
+  useEffect(() => {
+    const el = inputRef.current;
+    if (el) {
+      const handleFocus = () => {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+      };
+      el.addEventListener('focus', handleFocus);
+      return () => el.removeEventListener('focus', handleFocus);
+    }
+  }, []);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -300,6 +361,63 @@ const GrocStores = () => {
   // UI rendering comes here...
   return (
     <div className="px-4 ">
+      {stores.length < 1 && !loading && (
+       <div className="fixed top-0 left-0 w-full h-full z-50 flex flex-col items-center justify-center bg-green-50 text-center px-6 py-8 overflow-auto">
+            <img
+              src={tea} // replace with actual illustration
+              alt="Delivery illustration"
+              className="w-60 h-60 mb-4"
+            />
+            <h2 className="text-2xl font-bold text-gray-800 text-center">
+              Groceries, Food and more
+            </h2>
+            <p className="text-gray-600 text-center mt-2 mb-4">
+              Groceries, pharmacies - anything! We need your location to serve you better.
+            </p>
+            <div className="w-full max-w-sm flex items-center border rounded-md overflow-hidden bg-white shadow-sm mb-4">
+              <FiMapPin className="mx-3 text-gray-500" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+                placeholder="Enter your address"
+                className="min-h-8 py-2 px-2 outline-none"
+              />
+            </div>
+      
+            <button
+              onClick={retryGetLocation}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-full shadow-md mb-4"
+            >
+              <MdGpsFixed size={18} /> Try to detect my location
+            </button>
+      
+            <button className="text-green-700 underline mb-10">
+              Explore stores around you
+            </button>
+      
+      
+            <div className="text-center text-sm text-gray-500">
+              <p>We deliver in</p>
+              <div className="flex flex-wrap justify-center gap-2 mt-2">
+                {[
+                  "Kaduna", "Abuja", "Jos"
+                ].map((country, i) => (
+                  <span
+                    key={i}
+                    className="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm"
+                  >
+                    {country}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="mt-10 text-xs text-gray-400 text-center">
+              <p>&copy; {new Date().getFullYear()} PayNxt. All rights reserved.</p>
+            </div>
+          </div>
+      )}
       {loading ? (
         <div className="flex flex-col">
           <h2 className="text-lg font-medium text-gray-800 mb-2">Stores</h2>
@@ -561,7 +679,7 @@ const GrocStores = () => {
                       setTotal(formatPrice(total));
                       setShowCheckout(true);
                     }}
-                    className="bg-gray-200 text-gray-600 px-2 py-2  rounded-md hover:text-gray-800"
+                    className="bg-green-400 text-gray-50 px-2 py-2  rounded-md hover:text-gray-800"
                   >
                     Proceed to Checkout
                   </button>

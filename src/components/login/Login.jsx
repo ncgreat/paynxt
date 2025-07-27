@@ -12,6 +12,7 @@ import logo from '../../assets/logo.png';
 import { motion } from 'framer-motion';
 import wait from '../../assets/loading_.gif';
 import process from '../../assets/process.gif';
+// import OtpInput from './OtpInput.jsx';
 
 const Login = () => {
   const { setLoggedUser } = useContext(DealContext);
@@ -26,9 +27,40 @@ const Login = () => {
   const [userName, setUserName] = useState('');
   const [message, setMessage] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [otp, setOtp] = useState('');
+const [otpStep, setOtpStep] = useState(false);
+const [otpError, setOtpError] = useState('');
+const [resendCountdown, setResendCountdown] = useState(0);
+const [isActive, setIsActive] =useState(true);
+
 
   const emailInputRef = useRef(null);
   const navigate = useHistory();
+    const inputsRef = useRef([]);
+
+    const handleChange = (e, idx) => {
+    const val = e.target.value;
+    if (!/^[0-9]?$/.test(val)) return;
+
+    const otpArr = otp.split('');
+    otpArr[idx] = val;
+    setOtp(otpArr.join(''));
+
+    // Auto-focus next
+    if (val && idx < 5) {
+      inputsRef.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (e, idx) => {
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+      const otpArr = otp.split('');
+      otpArr[idx - 1] = '';
+      setOtp(otpArr.join(''));
+      inputsRef.current[idx - 1]?.focus();
+      e.preventDefault();
+    }
+  };  
 
   useEffect(() => {
     emailInputRef.current?.focus();
@@ -56,6 +88,16 @@ const Login = () => {
     setCheckingAuth(false);
   }, []);
 
+  useEffect(() => {
+  if (resendCountdown <= 0) return;
+
+  const interval = setInterval(() => {
+    setResendCountdown((prev) => prev - 1);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [resendCountdown]);
+
   const getCookie = (name) => {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? decodeURIComponent(match[2]) : null;
@@ -73,6 +115,57 @@ const Login = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const onVerifyOtp = async (e) => {
+  e.preventDefault();
+  setIsLogin(true);
+  setMessage(null);
+
+  try {
+    const verify_token = localStorage.getItem('verify_token');
+    const response = await axiosClient.post('/verify-otp', { otp, verify_token });
+// console.log(response);
+    const data = response.data;
+    // if(data.message){
+    //   setOtpError(data.message)
+    //   return;
+    // }
+
+    const encodedUser = btoa(JSON.stringify({ logged: data }));
+    setLoggedUser(data);
+    setUser(data.user);
+    setToken(data.token);
+
+    document.cookie = `lastUser=${encodedUser}; path=/; max-age=${60 * 60 * 24 * 7}`;
+    document.cookie = `lastUserName=${encodeURIComponent(data.user.name)}; path=/; max-age=${60 * 60 * 24 * 7}`;
+    document.cookie = `lastUserEmail=${encodeURIComponent(data.user.email)}; path=/; max-age=${60 * 60 * 24 * 7}`;
+    localStorage.setItem("session_token", data.session_token);
+
+    // Clean up temp storage
+    localStorage.removeItem('verify_token');
+    localStorage.removeItem('pending_email');
+
+    navigate.push('/dashboard');
+  } catch (err) {
+    // console.log(err.response?.data?.message);
+    setMessage(err.response?.data?.message || "Invalid or expired OTP");
+    setIsLogin(false);
+  }
+};
+
+const onResendOtp = async () => {
+  const email = localStorage.getItem('pending_email');
+  if (!email) return alert("No email found to resend OTP.");
+
+  try {
+    await axiosClient.post('/resend-otp', { email });
+    alert("OTP resent to your email.");
+    setResendCountdown(300); // Restart countdown on resend
+  } catch (err) {
+    alert("Could not resend OTP.");
+  }
+};
+
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsLogin(true);
@@ -84,25 +177,43 @@ const Login = () => {
     }
 
     try {
-      const { data } = await axiosClient.post('/login', { email, password }, { withCredentials: true });
+      const { data } = await axiosClient.post('/login', { email, password });
 
-      const encodedUser = btoa(JSON.stringify({ logged: data }));
-      setLoggedUser(data);
-      setUser(data.user);
-      setToken(null);
+      console.log(data);
+      if(data.active === false){
+          setIsActive(false);
+          return;
+      }
 
-      document.cookie = `lastUser=${encodedUser}; path=/; max-age=${60 * 60 * 24 * 7}`;
-      document.cookie = `lastUserName=${encodeURIComponent(data.user.name)}; path=/; max-age=${60 * 60 * 24 * 7}`;
-      document.cookie = `lastUserEmail=${encodeURIComponent(data.user.email)}; path=/; max-age=${60 * 60 * 24 * 7}`;
-      localStorage.setItem("session_token", data.session_token);
+      if(data.otp_required){
+      // Save the verify_token
+        localStorage.setItem('verify_token', data.verify_token);
+        localStorage.setItem('pending_email', email);
+        setOtpStep(true); // Set this new state
+        setIsLogin(false);
+        setResendCountdown(300); // start 5-min timer
+      }else{
+          const encodedUser = btoa(JSON.stringify({ logged: data }));
+          setLoggedUser(data);
+          setUser(data.user);
+          setToken(null);
 
-      navigate.push('/dashboard');
+          document.cookie = `lastUser=${encodedUser}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          document.cookie = `lastUserName=${encodeURIComponent(data.user.name)}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          document.cookie = `lastUserEmail=${encodeURIComponent(data.user.email)}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          localStorage.setItem("session_token", data.session_token);
+
+          navigate.push('/dashboard');
+      }
+
+    
     } catch (err) {
       if (err.response?.status === 422) {
         setMessage(err.response.data.message || "Invalid credentials");
       }
       setIsLogin(false);
     }
+
   };
 
   const clearSavedUser = () => {
@@ -120,6 +231,46 @@ const Login = () => {
     );
   }
 
+if (!isActive) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="bg-white shadow-xl rounded-lg p-8 max-w-sm text-center">
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="logo" className="w-12" />
+        </div>
+
+        {/* Icon */}
+        <div className="flex justify-center mb-2">
+          <svg
+            className="w-10 h-10 text-yellow-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+
+        {/* Message */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Account Inactive</h2>
+        <p className="text-gray-600 text-sm">
+          Your account is not yet active. Please check your email inbox or spam folder to activate your account.
+        </p>
+
+        {/* Optional: Resend link */}
+        {/* <button className="mt-4 text-sm text-blue-600 hover:underline">Resend activation email</button> */}
+      </div>
+    </div>
+  );
+}
+
+
   return (
     <div className="super__login">
       <Link to="/">
@@ -130,19 +281,93 @@ const Login = () => {
       </Link>
 
       <div className="super__login-header">
-        <img className="w-10" alt="logo" src={logo} />
-        <h1>Sign In</h1>
-        {!userName && (
-          <p>
-            Not registered?{' '}
-            <Link to="/signup">
-              <span className="font-bold text-base">Sign Up</span>
-            </Link>
-          </p>
-        )}
-      </div>
+              <img className="w-10" alt="logo" src={logo} />
+                    {!otpStep && (
+                      <>
+                      <h1>Sign In</h1>
+                      {!userName && (
+                        <p>
+                          Not registered?{' '}
+                          <Link to="/signup">
+                            <span className="font-bold text-base">Sign Up</span>
+                          </Link>
+                        </p>
+                      )}
+                      </>
+                    )}
+            </div>
 
-      <form onSubmit={onSubmit} className="w-full pl-10 pr-10 md:w-1/3 lg:w-1/4">
+      
+
+      {otpStep ? (
+        <form onSubmit={onVerifyOtp} className="w-full px-6 md:w-1/3 lg:w-1/4">
+          <h2 className="text-center text-lg font-semibold mb-4">Enter OTP sent to your email</h2>
+          {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-2 m-3 rounded-md shadow-md relative"
+          >
+            <button
+              onClick={() => setMessage(null)}
+              type="button"
+              className="absolute top-1 right-3 text-red-700 hover:text-red-900"
+            >
+              &times;
+            </button>
+            {/* <h3 className="font-semibold">Oops! Something went wrong</h3> */}
+            <p className="text-sm">{message}</p>
+          </motion.div>
+        )}
+          <div className="flex justify-between space-x-3 mb-6">
+              {[...Array(6)].map((_, i) => (
+                <input
+                  key={i}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength="1"
+                  value={otp[i] || ''}
+                  onChange={(e) => handleChange(e, i)}
+                  onKeyDown={(e) => handleKeyDown(e, i)}
+                  ref={(el) => inputsRef.current[i] = el}
+                  className="w-12 h-12 border border-gray-300 rounded-md text-center text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-[#582066]"
+                />
+              ))}
+            </div>
+
+          <button
+            type="submit"
+            className={`w-full py-3 rounded-lg shadow-md flex items-center justify-center transition-all ${isLogin ? "bg-gray-400 cursor-not-allowed" : "bg-[#0d2b36] hover:bg-[#0d2b36cb] text-[#ddd]"}`}
+            disabled={isLogin}
+          >
+            {isLogin ? (
+              <>
+                <img src={process} className='h-5 mr-2 rounded-full' alt="loading" />
+                Verifying...
+              </>
+            ) : "Verify OTP"}
+          </button>
+
+          {/* <p className="text-sm mt-4 text-center text-gray-600">
+            Didn’t receive code? <button onClick={onResendOtp} type="button" className="text-[#582066] underline">Resend</button>
+          </p> */}
+          <p className="text-sm mt-4 text-center text-gray-600">
+            Didn’t receive code?{" "}
+            <button
+              onClick={onResendOtp}
+              type="button"
+              className={`text-[#582066] underline disabled:text-gray-400 disabled:cursor-not-allowed`}
+              disabled={resendCountdown > 0}
+            >
+              {resendCountdown > 0
+                ? `Resend in ${Math.floor(resendCountdown / 60)}:${String(resendCountdown % 60).padStart(2, '0')}`
+                : 'Resend'}
+            </button>
+          </p>
+        </form>
+) : (
+  /* ... your existing login form ... */
+  <form onSubmit={onSubmit} className="w-full pl-10 pr-10 md:w-1/3 lg:w-1/4">
         {message && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -239,6 +464,8 @@ const Login = () => {
           </Link>
         </p>
       </form>
+)}
+      
     </div>
   );
 };

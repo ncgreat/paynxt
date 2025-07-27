@@ -1,7 +1,8 @@
 // import { useContext, useEffect, useState, createRef } from 'react';
 import React, { useState, useEffect, useContext, createRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { RiUser3Fill, RiLockPasswordFill, RiCloseFill, RiArrowGoBackFill } from 'react-icons/ri';
+import { IoReturnDownBack } from "react-icons/io5";
+import { RiUser3Fill, RiLockPasswordFill, RiCloseFill, RiArrowLeftLine } from 'react-icons/ri';
 import { useGoogleLogin } from '@react-oauth/google';
 import logo from '../../assets/logo.png';
 // import { DealContext } from '../../DealContext';
@@ -135,14 +136,14 @@ const Forgot = () => {
 						<img className="w-80" alt="Logo" src={logo} />
 					</div>
 					
-						<h1>Reset Password</h1>
+						<h2 className='font-semibold text-xl'>Reset Password</h2>
 						<p className='text-[#071a22] flex'>
-						<RiArrowGoBackFill size={12} className="h-5 w-5 ml-3"/><Link to="/login"><span className="font-bold text-base text-[#071a22]">Back to Login</span></Link>
+						<IoReturnDownBack size={10} className="h-5 w-5 m-1"/><Link to="/login"><span className="font-thin text-md text-[#071a22]">Back to login</span></Link>
 						</p>
 					  </div>
 				<div className="login-form ">
 				
-				<div className="m-[10%]">
+				<div className="border-t border-t-gray-500 rounded-xl p-3 px-8">
 				{message && (
 					<motion.div 
 					initial={{ opacity: 0, y: -10 }} 
@@ -162,7 +163,7 @@ const Forgot = () => {
 					</ul>
 					</motion.div>
 				)}
-					<div className="relative flex items-center mt-5 mb-4 text-gray-500 focus-within:text-gray-300">
+					<div className="relative flex items-center mt-3 mb-3 text-gray-500 focus-within:text-gray-300">
 						<RiUser3Fill size={18} className="h-5 w-5 absolute ml-3" />
 						<input
 							type="email"

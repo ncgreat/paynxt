@@ -1,108 +1,145 @@
+import React, { useEffect, useRef } from "react";
 import { BsArrowRightShort } from 'react-icons/bs';
 import { FaGift } from 'react-icons/fa';
 import { HiOutlineLightningBolt } from 'react-icons/hi';
-
+import Typed from "typed.js";
 import './header.css';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import smile from '../../assets/paynxt-mobile.png';
+
 const Header = () => {
-	return (
-		<div className="super__header">
-			<div className="super__header-content relative z-10">
-				<div className='z-20 mb-40'>
-				<motion.h1
-						className="text-4xl lg:text-6xl mt-16 font-bold"
-						initial={{ opacity: 0, y: -20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-					>
-						Simplify life with smart services
-					</motion.h1>
+  const typedElement = useRef(null);
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: true });
 
-					<motion.h3
-						className="text-lg lg:text-2xl mb-6"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.3, duration: 0.6 }}
-					>
-						From bill payments to food and grocery orders — everything you need, in one smart platform.
-					</motion.h3>
-					<div className='flex mt-4 justify-center'>
-					<motion.input
-							type="email"
-							placeholder="Your email address"
-							className="w-[80%] lg:w-[60%] px-4 py-2 text-sm rounded-l-md text-gray-500 bg-transparent border border-gray-300 dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0EADBF] focus:border-transparent"
-							aria-label="Email address"
-							initial={{ scale: 0.9, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							transition={{ delay: 0.5, duration: 0.4 }}
-						/>
+useEffect(() => {
+  let typed;
+  if (isInView && typedElement.current) {
+    typed = new Typed(typedElement.current, {
+    //   strings: [
+    //     "pay bills",
+    //     "order meals",
+    //     "order groceries",
+	// 	"purchase gift cards",
+    //   ],
 
-						<motion.button
-							className="bg-[#0EADBF] hover:bg-[#08675C] text-white px-4 py-2 rounded-r-md text-xs md:text-base flex items-center transition-all duration-300"
-							type="button"
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-						>
-							Get Started
-							<BsArrowRightShort className="ml-2 text-lg animate-pulse" />
-						</motion.button>
-					</div>
-					
-				</div>
+	  strings:[
+		"Order Essentials", 
+		"Pay Seamlessly",
+		"Get Rewarded",
+		"Stay Organized",
+		"Save More"
+	  ],
+      typeSpeed: 100,
+      backSpeed: 60,
+      backDelay: 1000,
+      loop: true,
+      showCursor: true,
+      cursorChar: "|",
+    });
+  }
+  return () => {
+    if (typed) typed.destroy();
+  };
+}, [isInView]);
 
-				<div className='hidden mt-6 h-[250px] relative overflow-hidden lg:flex'>
-    {/* Circle line */}
-    <div className='absolute top-96 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[760px] w-full px-5 border-2 border-gray-500 rounded-full z-0'></div>
-	<div className='absolute top-96-2  left-1/2 -translate-x-1/2 -translate-y-1/2 h-[745px] w-full px-5 border-2 border-gray-500 rounded-full z-0'></div>
 
-{/* <motion.div
-	className="rounded-md bg-[#0EADBF] p-4 h-1/3 mt-28 relative z-5 shadow-md"
-	whileHover={{ y: -10, boxShadow: '2px 5px 10px rgba(0, 0, 0, 0.1)' }}
+  return (
+    <div className="super__header">
+      <div className="super__header-content relative z-10">
+        <div className='z-20 mb-40'>
+          {/* Typing Effect */}
+<motion.div
+  ref={containerRef}
+  initial={{ opacity: 0, y: 30 }}
+  animate={isInView ? { opacity: 1, y: 0 } : {}}
+  transition={{ duration: 0.8, ease: "easeOut" }}
+  className="min-h-[60px] flex justify-center items-center mt-6"
 >
+  {/* <h3 className="text-4xl ">
+	We help you&nbsp;
+    <span className="text-green-600" ref={typedElement}></span>
+  </h3>
+  <h3 className="text-4xl ">with ease and convenience</h3> */}
+  <div className="text-center">
+  <h2 className="text-3xl font-medium text-gray-700 mb-1">
+   Start Today and
+  </h2>
+  <h2 className="text-4xl font-bold text-green-600 mb-1">
+    <span className="tracking-wide" ref={typedElement}></span>
+  </h2>
+  <h3 className="text-lg text-gray-500">
+    With Ease and Convenience
+  </h3>
+</div>
 
-	<h2 className="text-md mb-2 text-white font-semibold">
-		Bills Payment
-	</h2>
-</motion.div> */}
- {/* Info Card 1 */}
- <motion.div
+</motion.div>
+
+          <motion.h3
+            className="text-lg lg:text-xl mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            {/* You can include a supportive subtitle here */}
+          </motion.h3>
+
+          {/* Email Input + CTA */}
+          <div className='flex mt-4 justify-center'>
+            {/* <motion.input
+              type="email"
+              placeholder="Your email address"
+              className="w-[80%] lg:w-[60%] px-4 py-2 text-sm rounded-l-md text-gray-500 bg-transparent border border-gray-300 dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0EADBF] focus:border-transparent"
+              aria-label="Email address"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+            /> */}
+            <motion.button
+              className="bg-[#0EADBF] hover:bg-[#08675C] text-white px-6 py-2 rounded-full text-xs md:text-base flex items-center transition-all duration-300"
+              type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+				<span className="px-6">
+					   Get Started
+				</span>
+           
+              <BsArrowRightShort className=" text-lg animate-pulse" />
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Circle Background and Cards */}
+        <div className='hidden mt-6 h-[250px] relative overflow-hidden lg:flex'>
+          {/* Circle Line (visual only) */}
+          <div className='absolute top-96 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[760px] w-full px-5 border-2 border-gray-500 rounded-full z-0'></div>
+          <div className='absolute top-[370px] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[745px] w-full px-5 border-2 border-gray-500 rounded-full z-0'></div>
+
+          {/* Info Card 1 */}
+          <motion.div
             className="bg-white p-2 rounded-xl shadow-lg w-64 h-[210px] flex flex-col items-center text-center group transition-transform duration-300 hover:scale-105 z-10"
             whileHover={{ y: -10 }}
           >
-           <HiOutlineLightningBolt className="text-3xl text-[#0EADBF] mb-2 group-hover:drop-shadow-[0_0_8px_rgba(14,173,191,0.6)] transition" />
+            <HiOutlineLightningBolt className="text-3xl text-[#0EADBF] mb-2 group-hover:drop-shadow-[0_0_8px_rgba(14,173,191,0.6)] transition" />
             <h3 className="font-semibold text-gray-800">Smart Services</h3>
             <p className="text-sm text-gray-500 mt-1">
               Settle your utility bills, order food and groceries.
             </p>
           </motion.div>
 
+          {/* App Image */}
+          <motion.img
+            src={smile}
+            alt="PayNxt Mobile App"
+            className="w-[800px] h-auto object-cover object-top mix-blend-multiply opacity-90"
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          />
 
-
-
-	{/* App Image */}
-	<motion.img
-		src={smile}
-		alt="PayNxt Mobile App"
-		className="w-[800px] h-auto object-cover object-top mix-blend-multiply opacity-90"
-		initial={{ y: 50, opacity: 0 }}
-		animate={{ y: 0, opacity: 1 }}
-		transition={{ delay: 0.4, duration: 0.6 }}
-	/>
-
-	{/* <motion.div
-		className="bg-[#08675C] p-4 h-1/3 rounded-md relative mt-20 z-5 shadow-md"
-		whileHover={{ y: -10, boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)' }}
-	>
-
-		<h2 className="text-md mb-2 text-white font-semibold">
-			Enjoy Cashback
-		</h2>
-	</motion.div> */}
-
-	 {/* Info Card 2 */}
-	 <motion.div
+          {/* Info Card 2 */}
+          <motion.div
             className="bg-white p-2 rounded-xl shadow-lg w-64 h-[210px] flex flex-col items-center text-center group transition-transform duration-300 hover:scale-105 z-10"
             whileHover={{ y: -10 }}
           >
@@ -112,11 +149,10 @@ const Header = () => {
               Get instant rewards on every transaction.
             </p>
           </motion.div>
-</div>
-
-			</div>
-		</div>
-	);
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Header;

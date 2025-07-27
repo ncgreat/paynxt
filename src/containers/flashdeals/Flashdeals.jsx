@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Heart, X, ShoppingCart, CheckCircle, AlertCircle } from 'lucide-react';
+import { Clock, Star, ShoppingBag, Utensils, Car } from "lucide-react";
 import toast, { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import roastedfish from '../../assets/food/fishcherry.jpg';
@@ -12,10 +13,21 @@ import { Subheader } from '../index';
 import { DealContext } from '../../DealContext';
 import axios from "axios";
 
-const Flashdeals = () => {
+const Flashdeals = ({transactionLength, ...props}) => {
+  // if (transactionLength === 0) return null;
   const checkout = () => {
     setShowCheckout(true);
   };
+
+  //   if (transactionLength === 0) {
+  //   return (
+  //     <div className="p-4 text-center text-gray-500">
+  //       <h2>No deals available</h2>
+  //     </div>
+  //   );
+  // }
+  
+  const DEFAULT_HEIGHT = 896; // Adjust as needed
 
   const getBaseUrl = () => `${import.meta.env.VITE_API_BASE_URL}/api`;
 
@@ -44,6 +56,10 @@ const Flashdeals = () => {
   const [popularFetched, setPopularFetched] = useState(false);
   const hasInitialized = useRef(false);
   const [fetchError, setFetchError] = useState('');
+  const [opacity, setOpacity] = useState(1); // 1 is fully visible
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  
+      const [userCoords, setUserCoords] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -52,13 +68,104 @@ const Flashdeals = () => {
     note: '',
   });
 
+  useEffect(() => {
+    const getBrowserLocation = () => {
+      if (!navigator.geolocation) {
+        setLocationError("Geolocation is not supported by this browser.");
+        getIPFallback();
+        return;
+      }
+  
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserCoords({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.warn("Browser GPS failed:", error.message);
+          setLocationError("Using fallback location via IP.");
+          getIPFallback();
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    };
+  
+    const getIPFallback = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        if (data && data.latitude && data.longitude) {
+          setUserCoords({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) });
+        } else {
+          setLocationError("IP location service failed.");
+        }
+      } catch (err) {
+        console.error("IP fallback error:", err.message);
+        setLocationError("Failed to retrieve location by all means.");
+      }
+    };
+  
+    getBrowserLocation();
+  }, []);
+
+useEffect(() => {
+  const calculateOpacity = () => {
+    const maxHeight = 1000;
+    const currentHeight = window.innerHeight;
+
+    if (currentHeight <= DEFAULT_HEIGHT) {
+      setOpacity(1);
+    } else if (currentHeight >= maxHeight) {
+      setOpacity(0.2);
+    } 
+    // else {
+    //   const scale = 1 - (currentHeight - DEFAULT_HEIGHT) / (maxHeight - DEFAULT_HEIGHT);
+    //   setOpacity(scale);
+    // }
+  };
+
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight;
+    const windowHeight = window.innerHeight;
+
+    // If within 50px of the bottom, hide
+    if (scrollY + windowHeight >= docHeight - 50) {
+      setIsAtBottom(true);
+    } else {
+      setIsAtBottom(false);
+    }
+  };
+
+  calculateOpacity();
+  handleScroll();
+
+  window.addEventListener('resize', calculateOpacity);
+  window.addEventListener('scroll', handleScroll);
+
+  return () => {
+    window.removeEventListener('resize', calculateOpacity);
+    window.removeEventListener('scroll', handleScroll);
+  };
+}, []);
+
     // Fetch popular items
     useEffect(() => {
-      if (hasInitialized.current) return;
-      hasInitialized.current = true;
+      // if (hasInitialized.current) return;
+      // hasInitialized.current = true;
       const fetchMenuItems = async () => {
         try {
-          const response = await axios.get(`${getBaseUrl()}/menu/popular`);
+          const response = await axios.get(`${getBaseUrl()}/menu/popular`,
+          {
+          params: {
+            lat: userCoords.lat,
+            lng: userCoords.lng,
+          },
+        });
           setPopularItems(
             Array.isArray(response.data.data) ? response.data.data : []
           );
@@ -76,12 +183,15 @@ const Flashdeals = () => {
         return;
       }
       // console.log('fetched');
-      fetchMenuItems();
-    }, []);
+        if (userCoords) {
+            fetchMenuItems(userCoords.lat, userCoords.lng);
+          }
+    }, [userCoords]);
 
   const toggleLike = (itemName) => {
     setLiked((prev) => ({ ...prev, [itemName]: !prev[itemName] }));
   };
+  
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(price);
@@ -133,20 +243,23 @@ const Flashdeals = () => {
   const deliveryFee = 750;
   const grandTotal = subtotal + taxes + deliveryFee;
 
+
   return (
-    <div className="p-4 bg-gray-100 rounded-lg shadow-sm overflow-x-auto whitespace-nowrap z-50">
+    <div className="p-6 bg-gray-100 rounded-lg shadow-sm overflow-x-auto whitespace-nowrap z-50">
       <Toaster position="top-right" reverseOrder={true} />
-      <h2 className="text-lg font-medium text-gray-800 mb-2 ml-3">Super Deals</h2>
+      {/* <h2 className="text-lg font-medium text-gray-800 mb-2 ml-3">Super Deals</h2> */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-foreground">Popular Deals</h3>
+        <div className="flex items-center space-x-1 text-muted-foreground">
+          <Clock className="w-4 h-4" />
+          <span className="text-sm">Limited time</span>
+        </div>
+      </div>
 
       {/* Popular Items */}
       <div className="flex space-x-4 pb-4 items-center overflow-x-auto scrollbar-hide">
         {popularItems.map((item) => (
           <div key={item.name} className="relative flex items-center">
-            {/* <div
-              style={{ backgroundImage: `url(${item.img})` }}
-              className="h-[130px] w-[130px] bg-cover bg-center rounded-2xl shadow-xl flex flex-col justify-end p-3 text-white cursor-pointer"
-              onClick={() => handleSelectItem(item)}
-            > */}
              <div
                       style={{
                         backgroundImage: `url(https://paynxtapi.cyrusnet4d.com/public/storage/${
@@ -175,14 +288,28 @@ const Flashdeals = () => {
 
       </div>
 
-      {!showCart && (
-                  <button
-                    className="fixed bottom-24 z-50 right-6 bg-gray-800 text-white p-4 rounded-full"
-                    onClick={() => {setShowCart(true);}}
-                  >
-                    <ShoppingCart size={24} />
-                  </button>
-                )}
+{!showCart && !isAtBottom && (
+  <div>
+    {transactionLength > 0 && (
+      <button
+        className="fixed bottom-24 z-50 right-6 bg-gray-800 text-white p-4 rounded-full transition-opacity duration-200"
+        style={{ opacity }}
+        onClick={() => setShowCart(true)}
+      >
+        <ShoppingCart size={24} />
+      </button>
+    )}
+  </div>
+)}
+
+{isAtBottom && (
+   <button
+        className="fixed bottom-24 z-50 right-6 bg-gray-800 text-white p-4 rounded-full transition-opacity duration-200 opacity-10"
+        onClick={() => setShowCart(true)}
+      >
+        <ShoppingCart size={24} />
+      </button>
+)}
 
       {/* Item Modal */}
       {selectedItem && (

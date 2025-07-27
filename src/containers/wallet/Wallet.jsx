@@ -81,6 +81,10 @@ const Wallet = ({ user }) => {
 	  }, [])
 
 	  useEffect(() => {
+		window.scrollTo(0, 0);
+	   }, []);
+
+	  useEffect(() => {
 		// const userName = getCookie('lastUserName');
 		const encodedUser = getCookie('lastUser');
 		if (encodedUser) {
@@ -124,6 +128,7 @@ const Wallet = ({ user }) => {
 
 	const topup = () => {
 		// setIsModalOpen(true);
+		console.log('top wallet');
 		setFundWallet(false);
 		setTopWallet(true);
 	};
@@ -156,38 +161,6 @@ const Wallet = ({ user }) => {
 			localStorage.setItem('wallet', JSON.stringify(wallet));
 
 			topup_wallet(topup, transid);
-		} catch {}
-	};
-
-
-	const updateBalance1 = async (amount) => {
-		// console.log(amount);
-		try {
-			const response = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					wallet_id: user.id,
-				}),
-			});
-			//topup = topup/100;
-			const data = await response.json();
-			// console.log(data);
-			let new_balance = parseFloat(data.available_balance) + parseFloat(amount);
-			setNewBalance(new_balance);
-			setOldBalance(currentBalance);
-			setCurrentBalance(new_balance);
-
-			const loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
-			loggedUser.wallet_balance = new_balance.toString();
-			localStorage.setItem('loggedUser', JSON.stringify(loggedUser));
-
-			const wallet = JSON.parse(localStorage.getItem('wallet'));
-			wallet.available_balance = new_balance.toString();
-			localStorage.setItem('wallet', JSON.stringify(wallet));
-			topup_wallet(new_balance);
 		} catch {}
 	};
 
@@ -471,26 +444,6 @@ const Wallet = ({ user }) => {
 		setIsBalanceVisible(!isBalanceVisible);
 	}
 
-	const config = {
-		public_key: 'FLWPUBK-06ac0a7566cb386765adfee21cf4b779-X',
-		tx_ref: Date.now(),
-		amount: amount,
-		currency: 'NGN',
-		payment_options: 'card,mobilemoney,ussd',
-		customer: {
-		  email: user?.email,
-		//    phone_number: '08036398894',
-		  name: user?.name,
-		},
-		customizations: {
-		  title: 'PayNxt',
-		  description: 'Payment for items in cart',
-		  logo: logo,
-		},
-	  };
-	
-	  const handleFlutterPayment = useFlutterwave(config);
-
 	  
 	  const walletUpdate = async () => {
 		try {
@@ -595,10 +548,7 @@ const Wallet = ({ user }) => {
 	}, []);
 
 	function makePayment() {
-		// setIsModalOpen(true);
-		// getPlans();
-		// payWithMonnify();
-		// topup_wallet();
+		console.log('another');
 		walletUpdate();
 		setIsPaymentInProgress(true);
 	}
@@ -878,7 +828,7 @@ const Wallet = ({ user }) => {
 										<div className="pt-4">
 											<div className="relative flex flex-col w-full text-gray-500 focus-within:text-gray-700">
 											<button
-												onClick={topup}
+												onClick={()=>{topup(); console.log('check')}}
 												type="button"
 												className="text-white bg-[#206657] hover:bg-[#230d29] mb-5 focus:ring-2 focus:outline-none focus:ring-[#2d917b] dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
 											>

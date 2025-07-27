@@ -2,7 +2,7 @@ import { DealContext } from '../../DealContext';
 import { motion } from 'framer-motion';
 // import { RiCheckboxCircleFill } from 'react-icons/ri';
 import React,{ useEffect, useState, useContext,useRef } from 'react';
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, UtensilsCrossed } from "lucide-react";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { 
@@ -18,8 +18,14 @@ import {
   RiWifiFill,
   RiSmartphoneFill
 } from "react-icons/ri";
+import { Receipt, ShoppingCart, ShoppingBag, CreditCard,  Zap,   Smartphone, Tv, BookOpen, Phone } from "lucide-react";
 
 import './transactions.css';
+import { Badge } from "../../components/ui/badge";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
+
 
 const MTransactions = ({ user }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -44,6 +50,7 @@ const MTransactions = ({ user }) => {
   const toggleTransDetails = (transId) => {
     setIsModalOpen(true);
     userTransactions.map((trans) => {
+          console.log(trans);
       if (trans.id === transId) {
         setShowDetails(!showDetails);
         setExpandedOrder(expandedOrder === transId ? null : transId);
@@ -55,13 +62,13 @@ const MTransactions = ({ user }) => {
 
 
   const serviceIcons = {
-    airtime: <RiSmartphoneFill size={16} className="transaction__icon-success" />,
-    data: <RiWifiFill size={16} className="transaction__icon-success" />,
-    cable: <RiTv2Line size={16} className="transaction__icon-success" />,
-    betting: <RiFootballLine size={16} className="transaction__icon-success" />,
-    food: <RiRestaurantLine size={16} className="transaction__icon-success" />,
-    groceries: <RiShoppingCart2Line size={16} className="transaction__icon-success" />,
-    electricity: <RiFlashlightLine size={16} className="transaction__icon-success" />,
+    airtime: <Phone size={16} className="text-orange-500" />,
+    data: <Smartphone size={16} className="text-emerald-500" />,
+    cable: <Tv size={16} className="text-blue-500" />,
+    betting: <Receipt size={16} className="text-purple-500" />,
+    food: <ShoppingBag size={16} className="transaction__icon-success" />,
+    groceries: <ShoppingCart size={16} className="transaction__icon-success" />,
+    electricity: <Zap size={16} className="text-yellow-500" />,
   };
 
     useEffect(() => {
@@ -76,6 +83,25 @@ const MTransactions = ({ user }) => {
         setShowDetails(false);
         setSelectedTransactions([]);
       }
+
+       const iconMap = {
+        buyData: Smartphone,      // Mobile Data
+        buyAirtime: Phone,  // Airtime
+        Electricity: Zap,         // Electricity
+        CableTV: Tv,              // TV
+        Educational: BookOpen,    // Education
+        Food: UtensilsCrossed,
+      };
+
+    const colorMap = {
+      buyData: "text-emerald-500",
+      buyAirtime: "text-orange-500",
+      Electricity: "text-yellow-500",
+      CableTV: "text-blue-500",
+      Educational: "text-purple-500",
+      Food: "text-lime-500"
+    };
+      
 
   const getTransactions = async () => {
     setLoading(true);
@@ -92,7 +118,29 @@ const MTransactions = ({ user }) => {
       });
 
       const data = await response.json();
-      setUserTransactions(data.transactions || []);
+      console.log(data);
+      // const res = await response.json();
+      const backendTxns = data.transactions || [];
+
+        const mapped = backendTxns.map((txn) => ({
+          id: txn.id,
+          merchant: txn.phone_num,
+          amount: `₦${Number(txn.amount).toLocaleString()}`,
+          transAmount: txn.amount,
+          transaction_id: txn.transaction_id,
+          type: txn.service,
+          time: dayjs(txn.created_at).fromNow(),
+          status: txn.status.toLowerCase(), // "Successful" → "successful"
+          icon: iconMap[txn.category] || Receipt,
+          color: colorMap[txn.category] || "text-gray-500",
+          dateTime: txn.created_at
+        }));
+
+
+
+      setUserTransactions(mapped);
+
+      // setTransactions(data.transactions || []);
       setTotalPages(data.totalPages || 0);
       setLoading(false);
     } catch (error) {
@@ -105,13 +153,26 @@ const MTransactions = ({ user }) => {
     setCurrentPage(page);
   };
 
-  useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-    if (user?.id) {
+  // useEffect(() => {
+  //   if (hasInitialized.current) return;
+  //   hasInitialized.current = true;
+  //   if (user?.id) {
+  //     getTransactions();
+  //   }
+  // }, [currentPage, updateBalance, user?.id]);
+
+    useEffect(() => {
+    if (user?.id && !hasInitialized.current) {
+      hasInitialized.current = true;
       getTransactions();
     }
-  }, [currentPage, updateBalance, user?.id]);
+  }, [user?.id]);
+  
+  useEffect(() => {
+    if (hasInitialized.current && user?.id) {
+      getTransactions();
+    }
+  }, [currentPage]);
   
 
     	// Function to format the price as currency
@@ -142,7 +203,7 @@ const MTransactions = ({ user }) => {
   };
 
   return (
-    <div className="super__feature overflow-hidden">
+    <div className="super__feature overflow-hidden mb-12">
       <div className="ml-5">
         <div className="mb-3">
           <motion.div
@@ -198,23 +259,42 @@ const MTransactions = ({ user }) => {
                     {/* <td width="5%">
                       <RiCheckboxCircleFill size={16} className="transaction__icon-success" />
                     </td> */}
-                  <td width="5%">
-                    {serviceIcons[transaction.service.toLowerCase()] || (
-                      <RiCheckboxCircleFill size={16} className="transaction__icon-success" />
-                    )}
+                  <td width="5%" className='ml-4'>
+                    {/* <div className={`w-10 h-10 rounded-full ml-4 bg-gray-100 flex items-center justify-center`}>
+                      {serviceIcons[transaction.service.toLowerCase()] || (
+                          <RiCheckboxCircleFill size={16} className="transaction__icon-success" />
+                        )}
+                    </div> */}
+                    <div className={`w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center ${transaction.color}`}>
+                      <transaction.icon className="w-5 h-5" />
+                    </div>
                   </td>
-                    <td width="35%">
+                    <td width="42%">
                       <div className="table-col pl-5">
-                        <span className="text-bold">{transaction.service}
-                        {transaction.service.toLowerCase() !== "Reward Point Credited" && " Purchase"}</span>
-                        <TimestampFormatter timestamp={transaction.created_at} />
+                        {/* <span className="text-bold">{transaction.service}
+                        {transaction.service.toLowerCase() !== "Reward Point Credited" && " Purchase"}</span> */}
+                        <span className="text-bold">{transaction.merchant}</span>
+                        {/* <TimestampFormatter timestamp={transaction.created_at} /> */}
+                        <div className=''>
+                          {transaction.type} • {transaction.time}
+                        </div>
+                        
                       </div>
                     </td>
                     <td>
-                      <div className="rounded-full bg-[#0d2b36]  text-green-400 w-16 flex items-center justify-center py-1 ml-[35%]">
+                      {/* <div className="rounded-full bg-[#0d2b36]  text-green-400 w-16 flex items-center justify-center py-1 ml-[35%]">
                       <span className="text-[12px]">₦</span>
                         <span className="text-bold ">{transaction.amount}</span>
-                        {/* <span className="text-[12px]">NGN</span> */}
+                        
+                      </div> */}
+                      <div className="pl-6">
+                          <p className="font-semibold text-foreground">-{transaction.amount}</p>
+                            <Badge
+                              variant={transaction.status === "successful" ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {transaction.status}
+                          </Badge>
                       </div>
                     </td>
                     <td className="hidden sm:flex">{transaction.transaction_id}</td>
@@ -224,7 +304,7 @@ const MTransactions = ({ user }) => {
                         <TimestampFormatter timestamp={transaction.created_at} />
                       </div>
                     </td> */}
-                    <td className="p-3">
+                    <td className="p-1">
                    
                   </td>
                   </tr>
@@ -237,11 +317,11 @@ const MTransactions = ({ user }) => {
                               <div className="flex items-center justify-between">
                                 <h3 className="text-bold text-[#101c50]">Transaction Details</h3>
                               </div>
-                           <p><strong>Recipient:</strong> {transaction.phone_num}</p>
-                           <p><strong>Service:</strong> {transaction.service}</p>
+                           <p><strong>Recipient:</strong> {transaction.merchant}</p>
+                           <p><strong>Service:</strong> {transaction.type}</p>
                            <p><strong>Transaction ID:</strong> {transaction.transaction_id}</p>
-                           <p><strong>Amount:</strong> ₦{formatPrice(transaction.amount)}</p>
-                           <p><strong>Date|Time:</strong> <TimestampFormatter timestamp={transaction.created_at} /></p>
+                           <p><strong>Amount:</strong> ₦{formatPrice(transaction.transAmount)}</p>
+                           <p><strong>Date|Time:</strong> <TimestampFormatter timestamp={transaction.dateTime} /></p>
                                                      
                          </div>
                        )}

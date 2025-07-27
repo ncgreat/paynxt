@@ -27,6 +27,10 @@
 	scrollbar-width: none; /* Firefox */
 }
 
+.dark .bg-white {
+  /* background-color: white !important; */
+}
+
 
 @keyframes shimmer {
 	0% {

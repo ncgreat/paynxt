@@ -5,15 +5,22 @@ import {
   Categories,
   Popular,
   Search,
+  SearchResults,
+  MTransactions,
+  MTrans,
+  Settings,
+  More,
   Promo,
   Subheader,
   Stores
 } from '../../containers';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-
+import { FiMapPin } from "react-icons/fi";
+import { MdGpsFixed } from "react-icons/md";
 import { MdHome, MdSettings, MdWatchLater, MdWidgets, MdHistory, MdWallet  } from "react-icons/md";
 import { Store } from 'lucide-react';
+import location from '../../assets/location.gif';
 
 
 const Foods = () => {
@@ -23,6 +30,21 @@ const Foods = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { updateBalance, balance  } = useContext(DealContext);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showCart, setShowCart] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [isChosen, setIsChosen] = useState(false);
+  const [clearedSearch, setClearedSearch] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+  const [manualAddress, setManualAddress] = useState('');
+
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [foods, setFoods] = useState([]);
+  const savedCoord = localStorage.getItem("userCoords");
 
   const getBaseUrl = () => {
 		return `${import.meta.env.VITE_API_BASE_URL}/api`;
@@ -34,6 +56,12 @@ const Foods = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+  if (userCoords) {
+    // console.log('Updated userCoords:', userCoords);
+  }
+}, [userCoords]);
 
 
   // Retrieve user from localStorage
@@ -115,6 +143,57 @@ useEffect(() => {
   }
 }, [isMobile])
 
+const getBrowserLocation = () => {
+  if (!navigator.geolocation) {
+    setLocationError("Geolocation is not supported by this browser.");
+    getIPFallback();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      setUserCoords({ lat: latitude, lng: longitude });
+      setLocationError(null); // clear error
+    },
+    (error) => {
+      console.warn("Browser GPS failed:", error.message);
+      setLocationError("We couldn’t access your location. You can enter it manually.");
+      getIPFallback();
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+};
+
+const getIPFallback = async () => {
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const data = await res.json();
+    if (data && data.latitude && data.longitude) {
+      setUserCoords({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) });
+      setLocationError(null); // clear error
+    } else {
+      setLocationError("Unable to determine your location via IP.");
+    }
+  } catch (err) {
+    console.error("IP fallback error:", err.message);
+    setLocationError("Failed to retrieve your location.");
+  }
+};
+
+const retryGetLocation = () => {
+  getBrowserLocation();
+};
+
+useEffect(() => {
+  if(!savedCoord)
+  getBrowserLocation();
+}, []);
+
 
   // Logout user and redirect to login
   const logoutUser = () => {
@@ -125,15 +204,119 @@ useEffect(() => {
 		history.push('/');
   };
 
+  useEffect(() => {
+  const fetchFoods = async () => {
+    try {
+      const response = await axios.get(`${getBaseUrl()}/foods`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        params: {
+            lat: userCoords.lat,
+            lng: userCoords.lng,
+          },
+      });
+      setFoods(response.data.data);
+    } catch (error) {
+      console.error('Error fetching foods:', error);
+    }
+  };
+if(userCoords){
+  fetchFoods();
+}
+
+}, [userCoords]);
+
+
+
+const filteredFoods = searchQuery.trim()
+  ? foods.filter((food) =>
+      food.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  : null;
+
+
+  useEffect(() => {
+      !setClearedSearch
+  }, [clearedSearch])
+  
+const handleClose = () => {
+  setSearchQuery(''); 
+  if(clearedSearch){
+    setClearedSearch(false);
+  }else{
+    setClearedSearch(true);
+  }
+}
+
+console.log();
+
+
+// if (userCoords === null && locationError) {
+//   return (
+//         <div className="min-h-screen bg-green-50 flex flex-col items-center justify-start px-6 pt-12">
+//       <img
+//         src={location} // replace with actual illustration
+//         alt="Delivery illustration"
+//         className="w-60 h-60 mb-6"
+//       />
+//       <h2 className="text-2xl font-bold text-gray-800 text-center">
+//         Food, groceries and more
+//       </h2>
+//       <p className="text-gray-600 text-center mt-2 mb-4">
+//         Groceries, pharmacies - anything! We need your location to serve you better.
+//       </p>
+//       <div className="w-full max-w-sm flex items-center border rounded-md overflow-hidden bg-white shadow-sm mb-4">
+//         <FiMapPin className="mx-3 text-gray-500" />
+//         <input
+//           type="text"
+//           value={manualAddress}
+//           onChange={(e) => setManualAddress(e.target.value)}
+//           placeholder="Enter your address"
+//           className="flex-1 py-2 px-2 outline-none"
+//         />
+//       </div>
+
+//       <button
+//         onClick={retryGetLocation}
+//         className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-full shadow-md mb-4"
+//       >
+//         <MdGpsFixed size={18} /> Try to detect my location
+//       </button>
+
+//       <button className="text-green-700 underline mb-10">
+//         Explore stores around you
+//       </button>
+
+
+//       <div className="text-center text-sm text-gray-500">
+//         <p>We deliver in</p>
+//         <div className="flex flex-wrap justify-center gap-2 mt-2">
+//           {[
+//             "Kaduna", "Abuja", "Jos"
+//           ].map((country, i) => (
+//             <span
+//               key={i}
+//               className="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm"
+//             >
+//               {country}
+//             </span>
+//           ))}
+//         </div>
+//       </div>
+//       <div className="mt-10 text-xs text-gray-400 text-center">
+//         <p>&copy; {new Date().getFullYear()} PayNxt. All rights reserved.</p>
+//       </div>
+//     </div>
+//   );
+// }
+
+
   return (
     <div className="App min-h-screen">
       {!isMobile && user && (
         <div>
           <Navbar user={user} />
-          {/* <Wallet user={user} /> */}
-          {/* {user.user.role === "1" && <Stats user={user} />}  */}
-          {/* <Actions user={user} />
-          <Transactions user={user} /> */}
         </div>
       )}
 
@@ -141,22 +324,110 @@ useEffect(() => {
       {activeTab === 'home' && (
         <div className='mb-14'>
            {/* <Navbar user={user} /> */}
-           <Subheader title='Order Food' />
-           <Search user={user} />
+           <Subheader
+              title='Order Food'
+              subtitle="Order from your favorite restaurants"
+              onBack={() => {
+                // console.log(clearedSearch);
+                if (isMobile && activeTab === 'home' && showCart || showCheckout || selectedItem || selectedProduct || selectedStore || isChosen || filteredFoods) {
+                  // setActiveTab('bills'); // or any other fallback behavior
+                  history.push('/foods');
+                } else {
+                  history.push('/dashboard');
+                }
+              }}
+            />
+           <Search onSearch={setSearchQuery} clearedSearch={clearedSearch} setClearedSearch={setClearedSearch}/>
            {/* {<Promo user={user} />}  */}
-          <Categories user={user} /> 
-          <Stores user={user} /> 
+           {searchQuery ? (
+          <SearchResults
+            results={filteredFoods}
+            onClose={() => {handleClose()}}
+            showCart={showCart}
+            setShowCart={setShowCart} 
+            showCheckout={showCheckout} 
+            setShowCheckout={setShowCheckout} 
+            selectedItem={selectedItem} 
+            setSelectedItem={setSelectedItem}
+          />
+        ) : (
+          <div>
+            <Categories 
+              user={user} 
+              showCart={showCart}
+              setShowCart={setShowCart} 
+              showCheckout={showCheckout} 
+              setShowCheckout={setShowCheckout} 
+              selectedItem={selectedItem} 
+              setSelectedItem={setSelectedItem}
+              userCoords={userCoords}
+              setUserCoords={setUserCoords}
+            /> 
+            <Stores
+              user={user} 
+              showCart={showCart}
+              setShowCart={setShowCart} 
+              showCheckout={showCheckout} 
+              setShowCheckout={setShowCheckout} 
+              selectedStore={selectedStore} 
+              setSelectedStore={setSelectedStore}
+              selectedProduct={selectedProduct} 
+              setSelectedProduct={setSelectedProduct}
+              isChosen={isChosen}
+              userCoords={userCoords}
+              setUserCoords={setUserCoords}
+              setIsChosen={setIsChosen}
+            /> 
+          </div>
+        )}
+          
         </div>
       )}
-      {activeTab === 'settings' && <Settings user={user} />}
+      {activeTab === 'wallet' && (
+        <div className='mb-14'>
+          <Subheader title="My Wallet" subtitle="Manage your wallet"
+            onBack={() => {
+                setActiveTab('home');
+            }}
+          />
+          {/* <Wallet user={user} /> */}
+          {/** wallet transactions **/}
+          <MTrans user={user}/>
+        </div>
+        )}
+        {activeTab === 'settings' && (
+        <div className='mb-14'>
+          <Subheader title='Settings' 
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
+          <Settings user={user} />
+        </div>
+        )}
+
+      
       {activeTab === 'transactions' && (
         <div>
-          <Subheader title='Transactions' />
+          <Subheader title='Transactions' 
+            onBack={() => {
+              setActiveTab('home');
+           }}
+          />
           <MTransactions user={user} />
         </div>
       )
       }
-      {activeTab === 'logout' && logoutUser()}
+      {activeTab === 'more' && (
+        <div className='mb-14'>
+          <Subheader title='Extras' 
+            onBack={() => {
+              setActiveTab('home');
+           }}
+          />
+          <More user={user} />
+        </div>
+        )}
     </div>
 
       {isMobile && (
@@ -169,7 +440,10 @@ useEffect(() => {
               <button onClick={() => setActiveTab('transactions')} className={`flex flex-col items-center bg-gray-800 p-3 mt-1 rounded-md ${activeTab === 'transactions' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
                 <MdWatchLater  size={20} />
               </button>
-              <button onClick={() => setActiveTab('wallet')} className={`flex flex-col items-center rounded-full bg-green-900 p-3 border border-gray-600 ${activeTab === 'wallet' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
+              {/* <button onClick={() => setActiveTab('wallet')} className={`flex flex-col items-center rounded-full bg-green-900 p-3 border border-gray-600 ${activeTab === 'wallet' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
+                <MdWallet  size={25} />
+              </button> */}
+              <button onClick={() => setActiveTab('wallet')} className={`flex flex-col items-center rounded-md bg-green-900 p-3 border border-gray-600 ${activeTab === 'wallet' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
                 <MdWallet  size={25} />
               </button>
               

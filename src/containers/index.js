@@ -17,6 +17,7 @@ export { default as Mdash } from './mdash/Mdash';
 export { default as Subheader } from './subheader/Subheader';
 
 export { default as Search } from './searchbar/Search';
+export { default as SearchResults } from './searchbar/SearchResults';
 export { default as Popular } from './popular/Popular';
 export { default as Flashdeals } from './flashdeals/Flashdeals';
 export { default as Categories } from './categories/Categories';

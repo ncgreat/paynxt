@@ -6,11 +6,13 @@ import { DealProvider } from './DealContext';
 import App from './App.jsx';
 import './index.css';
 import './borderless.css';
+import 'leaflet/dist/leaflet.css';
+
 // import 'react-loading-skeleton/dist/skeleton.css';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-	<React.StrictMode>
+	// <React.StrictMode>
 		<GoogleOAuthProvider
 			clientId={import.meta.env.VITE_REACT_APP_GOOGLE_API_TOKEN}
 		>
@@ -20,5 +22,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				</Router>
 			</DealProvider>
 		</GoogleOAuthProvider>
-	</React.StrictMode>,
+	// </React.StrictMode>,
 );

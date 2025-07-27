@@ -1,7 +1,21 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Search as SearchIcon, Filter, Settings2 } from 'lucide-react';
 
-const Search = () => {
+const Search = ({ onSearch, clearedSearch, setClearedSearch }) => {
+  const [query, setQuery] = useState('');
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    if (onSearch) {
+      !setClearedSearch;
+      onSearch(value); // Inform parent of the query
+    }
+  };
+  useEffect(() => {
+    setQuery('');
+  }, [clearedSearch])
+  
   return (
     <div className="flex items-center justify-center p-4  z-50 bg-gray-50">
         {/* sticky top-14 */}
@@ -11,6 +25,8 @@ const Search = () => {
           type="text"
           placeholder="Search..."
           className="w-full px-4 py-2 focus:outline-none"
+          value={query}
+          onChange={handleChange}
         />
         <button className="p-2 bg-gray-100 hover:bg-gray-200">
           <Settings2 className="text-gray-600" size={20} />

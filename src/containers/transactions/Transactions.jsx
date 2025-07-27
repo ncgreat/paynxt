@@ -54,6 +54,7 @@ const Transactions = ({ user }) => {
       }
 
   const getTransactions = async () => {
+    // console.log(currentPage);
     setLoading(true);
     try {
       // const response = await fetch(`${getBaseUrl()}/get_transactions?page=${currentPage}&limit=5`, {
@@ -68,6 +69,7 @@ const Transactions = ({ user }) => {
       });
 
       const data = await response.json();
+      console.log(data);
       setUserTransactions(data.transactions || []);
       setTotalPages(data.totalPages || 0);
       setLoading(false);
@@ -81,13 +83,26 @@ const Transactions = ({ user }) => {
     setCurrentPage(page);
   };
 
+  // useEffect(() => {
+  //   if (hasInitialized.current) return;
+	// 	hasInitialized.current = true;
+  //   if (user?.id) {
+  //     getTransactions();
+  //   }
+  // }, [currentPage, updateBalance, user?.id]);
+
   useEffect(() => {
-    if (hasInitialized.current) return;
-		hasInitialized.current = true;
-    if (user?.id) {
-      getTransactions();
-    }
-  }, [currentPage, updateBalance, user?.id]);
+  if (user?.id && !hasInitialized.current) {
+    hasInitialized.current = true;
+    getTransactions();
+  }
+}, [user?.id]);
+
+useEffect(() => {
+  if (hasInitialized.current && user?.id) {
+    getTransactions();
+  }
+}, [currentPage]);
   
 
     	// Function to format the price as currency
@@ -178,7 +193,7 @@ const Transactions = ({ user }) => {
                     <td>
                       <div className="table-col pl-5">
                         <span className="text-bold">{transaction.service}</span>
-                        <span>{transaction.phone_num}</span>
+                        <span>{transaction.phone_num?transaction.phone_num:transaction.iuc_meter}</span>
                       </div>
                     </td>
                     <td>
@@ -192,6 +207,7 @@ const Transactions = ({ user }) => {
                       <div className="table-col">
                         <span className="text-bold">Completed</span>
                         <TimestampFormatter timestamp={transaction.created_at} />
+                        {/* {transaction.created_at}  */}
                       </div>
                     </td>
                     <td className="p-3">
@@ -212,7 +228,11 @@ const Transactions = ({ user }) => {
                               <div className="flex items-center justify-between">
                                 <h3 className="text-bold text-[#101c50]">Transaction Details</h3>
                               </div>
-                           <p><strong>Recipient:</strong> {transaction.phone_num}</p>
+
+                            {transaction?.iuc_meter &&(
+                              <p><strong> {transaction.token}</strong></p>
+                            )}
+                           <p><strong>Recipient:</strong> {transaction.phone_num?transaction.phone_num:transaction.iuc_meter}</p>
                            <p><strong>Service:</strong> {transaction.service}</p>
                            <p><strong>Transaction ID:</strong> {transaction.transaction_id}</p>
                            <p><strong>Amount:</strong> ₦{formatPrice(transaction.amount)}</p>

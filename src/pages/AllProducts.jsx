@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { DealContext } from "../DealContext";
 import { motion, AnimatePresence } from 'framer-motion';
 import wait from '../assets/loading.gif';
+import Swal from 'sweetalert2';
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
@@ -68,12 +69,13 @@ const AllProducts = () => {
 
   const addNewProduct = async () => {
     setIsLoading(true);
+    let final_price = productPrice + (productPrice * 0.075);
     try {
       const formData = new FormData();
       formData.append("vendor_id", loggedVendor?.user?.id);
       formData.append("name", productName);
       formData.append("category", productCategory);
-      formData.append("price", productPrice);
+      formData.append("price", final_price);
       formData.append("description", productDescription);
       formData.append("business_category", loggedVendor?.user?.business_category);
       if (productImage) {
@@ -90,6 +92,12 @@ const AllProducts = () => {
       if (response.ok) {
         // Append new product to state
         setProducts((prev) => [...prev, data.data]);
+         Swal.fire({
+              title: 'New Item Added',
+              text: `The item price has been adjusted to include 7.5% VAT`,
+              icon: 'success',
+              customClass: { container: 'borderless' },
+        });
         setIsModalOpen(false); // Close modal
         setProductName("");
         setProductCategory("");
@@ -373,7 +381,7 @@ const AllProducts = () => {
                         onChange={(e) => setProductPrice(e.target.value)}
                         className="block py-2.5 px-3 w-full text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
                       />
-
+                        <span className="text-xs -mt-4 text-gray-400">The final price will be adjusted to include 7.5% VAT</span>
                       {/* Description */}
                       <textarea
                         placeholder="Product Description"

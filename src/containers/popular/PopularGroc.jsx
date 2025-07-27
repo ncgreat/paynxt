@@ -553,7 +553,7 @@ const PopularGroc = () => {
                           setTotal(formatPrice(total));
                           setShowCheckout(true);
                         }}
-                        className="bg-gray-200 text-gray-600 px-2 py-2  rounded-md hover:text-gray-800"
+                        className="bg-green-400 text-gray-50 px-2 py-2  rounded-md hover:text-gray-800"
                       >
                         Proceed to Checkout
                       </button>

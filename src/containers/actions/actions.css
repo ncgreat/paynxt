@@ -524,7 +524,7 @@ input[type="number"] {
 		display: flex;
 		justify-content: center;
 		margin: 0 auto !important;
-		width: 130px;
+		/* width: 130px; */
 		padding: 0 6px;
 		/* padding-left: 5px; */
 		/* border: 1px solid #582066; */

@@ -7,20 +7,21 @@ import axios from 'axios';
 import fallbackImage from '../../assets/placeholder.webp';
 import { DealContext } from '../../DealContext';
 
-const FoodList = ({ category }) => {
+const FoodList = ({ category, showCart, setShowCart ,showCheckout, setShowCheckout, selectedItem, setSelectedItem, userCoords, setUserCoords}) => {
   const [items, setItems] = useState([]);
   const [liked, setLiked] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [showCart, setShowCart] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
+  // const [selectedItem, setSelectedItem] = useState(null);
+  // const [showCart, setShowCart] = useState(false);
+  // const [showCheckout, setShowCheckout] = useState(false);
   const [total, setTotal] = useState('');
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', note: '' });
   const [formError, setFormError] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('Wallet Balance');
+    // const [userCoords, setUserCoords] = useState(null);
 
   const { cart, addToCart, removeFromCart, clearCart, updateCartItemQuantity, getCartTotal } = useContext(DealContext);
 
@@ -38,7 +39,14 @@ const FoodList = ({ category }) => {
       if (category) {
         setLoading(true);
         try {
-          const response = await axios.get(`${getBaseUrl()}/foods?category=${category}`);
+          const response = await axios.get(`${getBaseUrl()}/foods?category=${category}`,
+          {
+          params: {
+            lat: userCoords.lat,
+            lng: userCoords.lng,
+          },
+        });
+          // console.log(response);
           setItems(response.data.data);
         } catch (error) {
           console.error('Failed to fetch items:', error);
@@ -47,9 +55,55 @@ const FoodList = ({ category }) => {
         }
       }
     };
+    if(userCoords){
+        fetchItems();
+    }
 
-    fetchItems();
-  }, [category]);
+  }, [category, userCoords]);
+
+    // useEffect(() => {
+    //   const getBrowserLocation = () => {
+    //     if (!navigator.geolocation) {
+    //       setLocationError("Geolocation is not supported by this browser.");
+    //       getIPFallback();
+    //       return;
+    //     }
+    
+    //     navigator.geolocation.getCurrentPosition(
+    //       (position) => {
+    //         const { latitude, longitude } = position.coords;
+    //         setUserCoords({ lat: latitude, lng: longitude });
+    //       },
+    //       (error) => {
+    //         console.warn("Browser GPS failed:", error.message);
+    //         setLocationError("Using fallback location via IP.");
+    //         getIPFallback();
+    //       },
+    //       {
+    //         enableHighAccuracy: true,
+    //         timeout: 10000,
+    //         maximumAge: 0,
+    //       }
+    //     );
+    //   };
+    
+    //   const getIPFallback = async () => {
+    //     try {
+    //       const res = await fetch('https://ipapi.co/json/');
+    //       const data = await res.json();
+    //       if (data && data.latitude && data.longitude) {
+    //         setUserCoords({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) });
+    //       } else {
+    //         setLocationError("IP location service failed.");
+    //       }
+    //     } catch (err) {
+    //       console.error("IP fallback error:", err.message);
+    //       setLocationError("Failed to retrieve location by all means.");
+    //     }
+    //   };
+    
+    //   getBrowserLocation();
+    // }, []);
 
   const handleSelectItem = (item) => {
     const existingItem = cart[item.vendor_id]?.find((i) => i.name === item.name);
@@ -107,8 +161,8 @@ const FoodList = ({ category }) => {
   
 
   return (
-    <div className="px-4 bg-gray-100 rounded-2xl">
-      <h2 className="text-lg font-medium text-gray-800 capitalize py-4">{category || 'All'}</h2>
+    <div className="px-2 bg-gray-100 rounded-2xl">
+      <h2 className="text-lg font-medium text-gray-800 capitalize pt-2 pl-2">{category || 'All'}</h2>
 
       {loading ? (
         <div className="flex gap-4 overflow-x-auto p-2 scrollbar-hide">
@@ -154,7 +208,7 @@ const FoodList = ({ category }) => {
                 )}
 
                 {selectedItem && (
-                  <div className="fixed inset-0 bg-white flex flex-col mt-10 py-6 overflow-auto">
+                  <div className="fixed inset-0 bg-white flex flex-col mt-12 py-6 overflow-auto">
                     <div className="bg-[#0000004b] p-1 flex items-center justify-center rounded-3xl absolute top-10 right-4">
                       <button
                         className=" text-gray-200  hover:text-gray-800"
@@ -220,7 +274,7 @@ const FoodList = ({ category }) => {
                 )}
 
                 {showCart && (
-                  <div className="fixed inset-0 bg-white flex flex-col mt-10 py-6 overflow-auto mb-16">
+                  <div className="fixed inset-0 bg-white flex flex-col mt-12 py-6 overflow-auto mb-16">
                     <div className="relative top-3 left-7 mb-6 font-bold text-xl">
                       <h3>My order</h3>
                     </div>
@@ -415,7 +469,7 @@ const FoodList = ({ category }) => {
                                 setTotal(formatPrice(total));
                                 setShowCheckout(true);
                               }}
-                              className="bg-gray-200 text-gray-600 px-2 py-2  rounded-md hover:text-gray-800"
+                              className="bg-green-400 text-gray-200 px-2 py-2  rounded-md hover:text-gray-800"
                             >
                               Proceed to Checkout
                             </button>
@@ -427,7 +481,7 @@ const FoodList = ({ category }) => {
                 )}
 
                {showCheckout && (
-                    <div className="fixed inset-0 bg-white flex flex-col mt-10 pb-28 overflow-auto">
+                    <div className="fixed inset-0 bg-white flex flex-col mt-12 pb-28 overflow-auto">
                       <div className="px-6 pt-9 pb-3 flex justify-between items-center border-b border-gray-200">
                         <h2 className="text-xl font-bold text-gray-800">Checkout</h2>
                         <button onClick={() => setShowCheckout(false)} className="text-gray-600 hover:text-red-500 transition">

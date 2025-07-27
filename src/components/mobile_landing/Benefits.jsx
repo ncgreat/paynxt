@@ -90,7 +90,7 @@ useEffect(() => {
         const delay = setTimeout(() => {
           setLoading(false); // hide loader
           navigate.push('/login', { replace: true }); // navigate after delay
-        }, 7500); // 10.5 seconds
+        }, 2500); // 10.5 seconds
       
         return () => clearTimeout(delay); // clean up if component unmounts early
       }
@@ -110,7 +110,7 @@ useEffect(() => {
       navigate.push('/dashboard', { replace: true });
     } else {
     //   setLoading(false); // done checking, safe to render
-        const delay = setTimeout(() => setLoading(false), 10500); // Simulate loading
+        const delay = setTimeout(() => setLoading(false), 1500); // Simulate loading
         return () => clearTimeout(delay);
     }
   }, []);
@@ -159,7 +159,7 @@ useEffect(() => {
         <motion.img
           src={logo}
           alt="App Logo"
-          className="w-20 h-30 mb-6"
+          className="w-15 h-20 mb-6 -mt-28"
           animate={{
             scale: [1, 1.05, 1],
             opacity: [1, 0.8, 1],
@@ -196,14 +196,14 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-[#0d2b36] text-white flex flex-col items-center justify-center overflow-hidden">
       {/* Skip */}
-      <div className="w-full px-6 pt-6 flex justify-end">
+      {/* <div className="w-full px-10 pt-6 flex justify-end ">
         <Link to="/login">
-          <button className="text-sm text-gray-400 hover:text-white">Skip</button>
+          <button className="text-sm p-4 text-gray-400 hover:text-white border border-gray-400 rounded-md">Skip</button>
         </Link>
-      </div>
+      </div> */}
 
       {/* Slider */}
-      <Slider {...settings} className="w-full max-w-md px-6 relative -top-11">
+      <Slider {...settings} className="w-full max-w-md px-6 relative -top-16">
         {benefits.map((b, i) => (
           <motion.div
             key={i}
@@ -211,7 +211,7 @@ useEffect(() => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 0.5 }}
             viewport={{ once: true }}
-            className="p-6 flex flex-col items-center justify-center text-center py-64"
+            className="p-6 flex flex-col items-center justify-center text-center py-52"
           >
             <div className="text-5xl">{b.icon}</div>
             <h2 className="text-2xl font-semibold">{b.title}</h2>
@@ -222,7 +222,7 @@ useEffect(() => {
 
      
       {/* Progress Bar */}
-      <div className="w-full max-w-md px-6 relative -top-12">
+      <div className="w-full max-w-md px-6 relative -top-20">
         <div className="h-1 bg-gray-600 rounded-full overflow-hidden">
           <div
             className="h-full bg-gray-300 transition-all duration-300 ease-in-out"

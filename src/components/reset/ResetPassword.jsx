@@ -95,22 +95,37 @@ const ResetPassword = () => {
 	  }
 
 	   if (resetSuccess) {
-			return (
-				<motion.div 
-				initial={{ opacity: 0, scale: 0.9 }} 
-				animate={{ opacity: 1, scale: 1 }} 
-				exit={{ opacity: 0, scale: 0.9 }}
-				className="flex flex-col items-center text-center justify-center h-screen -mt-10"
-			  >
-				<img className="w-16 mb-4" alt="Logo" src={logo} />
-				{/* <h1 className="text-2xl font-semibold text-[#181325]">Welcome!</h1> */}
-				<p className="text-gray-600 mt-2">Your new password was set successfully.</p>
-				<Link to="/login">
-				  <button className="mt-5 px-6 py-2 bg-[#1e0c50c9] hover:bg-[#262775c9] text-[#ddd] rounded-lg shadow-md">
-					 Login
-				  </button>
-				</Link>
-		  </motion.div>
+		return (
+			<motion.div
+			initial={{ opacity: 0, y: 30 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: 30 }}
+			transition={{ duration: 0.5, ease: "easeOut" }}
+			className="flex flex-col items-center justify-center h-screen bg-white text-center px-6"
+			>
+			<motion.img
+				src={logo}
+				alt="App Logo"
+				className="w-16 mb-4"
+				initial={{ scale: 0.95 }}
+				animate={{ scale: 1 }}
+				transition={{ duration: 0.6, ease: "easeInOut" }}
+			/>
+
+			<h1 className="text-2xl font-bold text-gray-800">Password Reset Successful</h1>
+
+			<p className="mt-2 text-sm text-gray-500 max-w-xs">
+				Your password has been updated. You can now log in with your new credentials.
+			</p>
+
+			<Link to="/login">
+				<button
+				className="mt-6 px-6 py-2.5 text-sm font-medium bg-[#1e0c50] hover:bg-[#3a2d7a] text-white rounded-lg shadow-lg transition-all duration-300"
+				>
+				Go to Login
+				</button>
+			</Link>
+			</motion.div>
 		);
 	}
 
@@ -128,7 +143,7 @@ const ResetPassword = () => {
 						<img className="w-80" alt="Logo" src={logo} />
 					</div>
 					
-						<h1>New Password</h1>
+						<h3>New Password</h3>
 	
 					  </div>
 				<div className="login-form ">

@@ -21,6 +21,7 @@ import {
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import user_pic from '../../assets/user-icon.png';
+import {  Button } from "../../components/ui/";
 
 import { MdHome, MdSettings, MdWatchLater, MdWallet, MdHistory, MdWidgets  } from "react-icons/md";
 
@@ -34,6 +35,11 @@ const Dashboard = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { updateBalance, balance, viewMore  } = useContext(DealContext);
   const [notifications, setNotifications] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [transactionLength, setTransactionLength] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [deals, setDeals] =useState(false);
 
   const getBaseUrl = () => {
 		return `${import.meta.env.VITE_API_BASE_URL}/api`;
@@ -158,6 +164,57 @@ const Dashboard = () => {
     }
 };
 
+  const getTransactions = async () => {
+    let currentUser = user?.user?.id;
+    const encodedUser = getCookie('lastUser');
+    if(currentUser == undefined){
+      if (!loggedUser || !loggedUser.user) {
+        if (encodedUser) {
+          try {
+            const userFromCookie = JSON.parse(atob(encodedUser));
+            if (userFromCookie?.logged) {
+              currentUser = userFromCookie.logged.user.id;
+            } else {
+              history.push('/'); // No valid user, go to login
+            }
+          } catch (error) {
+            console.error("Failed to parse user from cookie", error);
+            history.push('/'); // Parsing error, force login
+          }
+        } else {
+          history.push('/'); // No cookie, redirect to login
+        }
+      }else{
+        currentUser = loggedUser
+      }
+    }
+    setLoading(true);
+    try {
+			const response = await fetch(`${getBaseUrl()}/get_transactions?page=${currentPage}&limit=5`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: currentUser,
+        }),
+      });
+
+      const data = await response.json();
+      // console.log(data.transactions.length);
+      setTransactionLength(data?.transactions?.length);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+  //  getTransactions()
+  }, [])
+  
+
 useEffect(() => {
   if(!isMobile) {
     setActiveTab('');
@@ -193,6 +250,12 @@ useEffect(() => {
 		history.push('/');
   };
 
+  useEffect(() => {
+    if(transactionLength > 0)
+      setDeals(true);
+  }, [transactionLength])
+  
+
   if (!loggedUser || !loggedUser.user) {
     return null; // or show a small Loading spinner
   }
@@ -204,7 +267,12 @@ useEffect(() => {
           <Navbar user={user} />
           <Wallet user={user} />
           {user.user.role === "1" && <Stats user={user} />} {/* Show Stats for role 1 */}
-          <Actions user={user} />
+          {/* <Actions user={user} /> */}
+          <Actions
+            user={user}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
           <Transactions user={user} />
         </div>
       )}
@@ -215,7 +283,7 @@ useEffect(() => {
            {/* <Navbar user={user} /> */}
            {/* <Wallet user={user} /> */}
            <div>
-          <div className=" flex flex-row justify-between mt-5">
+          <div className=" flex flex-row justify-between mt-12">
               <div className='flex flex-row'>
                 <img src={user_pic} className='border border-gray-200 shadow-md rounded-lg p-2 w-[55px] h-[55px] mx-6 mt-1 text-xl sm:mx-[95px] md:mx-[95px] lg:ml-[95px]' alt=''/>
                 <div className='flex flex-col mt-1 sm:mt-0 lg:mt-0 lg:-ml-[28%]'>
@@ -253,21 +321,26 @@ useEffect(() => {
             </div>
            </div>
            <Mdash user={user}/>
-          <Promo user={user} /> 
-          <Flashdeals/>
-           <div className='rounded-t-3xl h-full mt-4 bg-gray-200'>
-            <div className='mx-2 pt-3'>
-               <MTrans user={user} />
-            </div>
-             
-           </div>
+           <Promo user={user}/> 
+           {/* <Flashdeals
+              transactionLength={transactionLength}
+              style={{ display: transactionLength === 0 ? 'none' : 'block' }}
+            /> */}
+
+
+          
         </div>
       )}
    
       {activeTab === 'wallet' && (
         <div className='mb-14'>
-          <Subheader title='Wallet' />
-          <Wallet user={user} />
+          <Subheader title="My Wallet" subtitle="Manage your wallet"
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
+          
+          {/* <Wallet user={user} /> */}
           {/** wallet transactions **/}
           <MTrans user={user}/>
         </div>
@@ -275,21 +348,33 @@ useEffect(() => {
    
       {activeTab === 'settings' && (
         <div className='mb-14'>
-          <Subheader title='Settings' />
+          <Subheader title='Settings' 
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
           <Settings user={user} />
         </div>
         )}
 
       {activeTab === 'more' && (
         <div className='mb-14'>
-          <Subheader title='Extras' />
+          <Subheader title='Extras' 
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
           <More user={user} />
         </div>
         )}
 
       {activeTab === 'transactions' && (
         <div className='mb-14'>
-          <Subheader title='Transactions' />
+          <Subheader title='Transactions' 
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
           <MTransactions user={user} />
         </div>
         )}
@@ -319,14 +404,18 @@ useEffect(() => {
       <MdWatchLater size={20} />
     </button>
 
-    <button 
+    {/* <button 
       onClick={() => setActiveTab('wallet')} 
-      className={`flex flex-col items-center rounded-full bg-gray-100 p-3 border border-gray-600 transform transition-transform duration-600 active:scale-90 ${
+      className={`flex flex-col items-center rounded-md bg-green-900 p-3 border border-gray-600 transform transition-transform duration-600 active:scale-90 ${
         activeTab === 'wallet' ? 'text-green-700 border-green-500' : 'text-gray-600'
       }`}
     >
       <MdWallet size={25} />
-    </button>
+    </button> */}
+
+    <button onClick={() => setActiveTab('wallet')} className={`flex flex-col items-center rounded-md bg-green-900 p-3 border border-gray-600 ${activeTab === 'wallet' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
+        <MdWallet  size={25} />
+     </button>
 
     <button 
       onClick={() => setActiveTab('settings')} 

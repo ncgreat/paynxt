@@ -6,8 +6,10 @@ import {
   Actions,
   Transactions,
   MTransactions,
+  MTrans,
   Settings,
   Stats,
+  More,
   Subheader
 } from '../../containers';
 import axios from 'axios';
@@ -18,7 +20,8 @@ import { MdHome, MdSettings, MdWatchLater, MdWidgets, MdHistory, MdWallet  } fro
 
 const Bills = () => {
   const { loggedUser, setLoggedUser } = useContext(DealContext);
-  const history = useHistory();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useHistory();
   
   const [activeTab, setActiveTab] = useState('home');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -28,6 +31,11 @@ const Bills = () => {
   const getBaseUrl = () => {
 		return `${import.meta.env.VITE_API_BASE_URL}/api`;
 	 };
+
+   
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
 
      // Handle screen resizing
   useEffect(() => {
@@ -65,6 +73,7 @@ const Bills = () => {
   })();
 
   let csrfFetched = false;
+
   // // Check session validity on mount
   useEffect(() => {
     if (!user || !user.user) {
@@ -111,6 +120,18 @@ const Bills = () => {
     }
 };
 
+const handleTabChange = (menuKey, link) => {
+  if (isMobile && activeTab === 'home') {
+    if (!isModalOpen) {
+      navigate('/dashboard');
+    } else {
+      setActiveTab(menuKey); // Update tab without navigating
+    }
+  } else {
+    navigate(link);
+  }
+};
+
 useEffect(() => {
   if(!isMobile) {
     setActiveTab('');
@@ -128,6 +149,7 @@ useEffect(() => {
 		// googleLogout();
 		navigate.push('/');
   };
+  
 
   return (
     <div className="App min-h-screen">
@@ -136,35 +158,90 @@ useEffect(() => {
           <Navbar user={user} />
           <Wallet user={user} />
           {user.user.role === "1" && <Stats user={user} />} {/* Show Stats for role 1 */}
-          <Actions user={user} />
+          {/* <Actions user={user} /> */}
+          <Actions
+            user={user}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
           <Transactions user={user} />
         </div>
       )}
 
     <div>
       {activeTab === 'home' && (
-        <div className='mb-14'>
+        <div className='mb-2'>
            {/* <Navbar user={user} /> */}
-           <Subheader title='Pay Bills' />
-           <Wallet user={user} />
-           {user.user.role === "1" && <Stats user={user} />} 
-          <Actions user={user} /> 
+           <Subheader
+              title='Pay Bills'
+              subtitle="Airtime, Data & Utilities"
+              onBack={() => {
+                if (isMobile && activeTab === 'home' && isModalOpen) {
+                  // setActiveTab('bills'); // or any other fallback behavior
+                  navigate.push('/bills');
+                } else {
+                  navigate.push('/dashboard');
+                }
+              }}
+            />
+           {/* <Wallet user={user} /> */}
+           {/* {user.user.role === "1" && <Stats user={user} />}  */}
+          {/* <Actions user={user} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}/>  */}
+          <Actions
+            user={user}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
         </div>
       )}
-      {activeTab === 'settings' && <Settings user={user} />}
+      {activeTab === 'wallet' && (
+        <div className='mb-14'>
+          <Subheader title="My Wallet" subtitle="Manage your wallet"
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
+          {/* <Wallet user={user} /> */}
+          {/** wallet transactions **/}
+          <MTrans user={user}/>
+        </div>
+        )}
+      {activeTab === 'settings' && (
+        <div className='mb-14'>
+          <Subheader title='Settings' 
+           onBack={() => {
+              setActiveTab('home');
+           }}
+          />
+          <Settings user={user} />
+        </div>
+        )}
       {activeTab === 'transactions' && (
         <div>
-          <Subheader title='Transactions' />
+          <Subheader title='Transactions' 
+          onBack={() => {
+              setActiveTab('home');
+           }}
+          />
           <MTransactions user={user} />
         </div>
       )
       }
-      {activeTab === 'logout' && logoutUser()}
+      {activeTab === 'more' && (
+        <div className='mb-14'>
+          <Subheader title='Extras' 
+          onBack={() => {
+              setActiveTab('home');
+           }}/>
+          <More user={user} />
+        </div>
+        )}
+      {/* {activeTab === 'logout' && logoutUser()} */}
     </div>
 
       {isMobile && (
             <div className="fixed bottom-0 left-0 w-full bg-[#0d2b36] rounded-t-2xl text-[#c0c0c0] flex justify-around py-3 shadow-md border-t border-gray-800">
-                    <button onClick={() => history.push('/')} className={`flex flex-col items-center bg-gray-800 p-3 mt-1 rounded-md ${activeTab === 'home' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
+                    <button onClick={() => navigate.push('/')} className={`flex flex-col items-center bg-gray-800 p-3 mt-1 rounded-md ${activeTab === 'home' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
                 <MdHome size={20} />
                   {/* <span className="text-sm">Home</span> */}
                   {/* {activeTab === 'home' && (<div><span className="text-sm">Home</span></div>)} */}
@@ -173,7 +250,7 @@ useEffect(() => {
               <button onClick={() => setActiveTab('transactions')} className={`flex flex-col items-center bg-gray-800 p-3 mt-1 rounded-md ${activeTab === 'transactions' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
                 <MdWatchLater  size={20} />
               </button>
-              <button onClick={() => setActiveTab('wallet')} className={`flex flex-col items-center rounded-full bg-green-900 p-3 border border-gray-600 ${activeTab === 'wallet' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
+              <button onClick={() => setActiveTab('wallet')} className={`flex flex-col items-center rounded-md bg-green-900 p-3 border border-gray-600 ${activeTab === 'wallet' ? 'text-green-500 bg-gray-700 p-3 border border-gray-600 rounded-md' : ''}`}>
                 <MdWallet  size={25} />
               </button>
               

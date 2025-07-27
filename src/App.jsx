@@ -1,14 +1,15 @@
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
-import { BenefitsPage, MobileLanding, Login, Signup, Dashboard, Bills, Rides, Landing, Foods, Groceries, Forgot, ResetPassword, FoodVendor, VendorLogin, VendorSignup, Onboarding } from './components';
+import { BenefitsPage, MobileLanding, Login, Signup, Dashboard, Bills, Rides, GiftCards, Landing, Foods, Groceries, Forgot, ResetPassword, FoodVendor, VendorLogin, VendorSignup, Onboarding, Welcome } from './components';
 import { LoadScript } from '@react-google-maps/api';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import 'leaflet/dist/leaflet.css';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  
+
 	useEffect(() => {
 	  const handleResize = () => setWindowWidth(window.innerWidth);
 	  window.addEventListener('resize', handleResize);
@@ -16,6 +17,7 @@ function App() {
 	}, []);
   
 	const isMobile = useMemo(() => windowWidth <= 768, [windowWidth]);
+	
 
 	return (
         // <Router>
@@ -36,11 +38,13 @@ function App() {
 		// 	loadingElement={<div style={{ display: 'none' }} />}
 		// >
 		<>
+		<div className='relative min-h-screen'>
 		 <Toaster position="top-right" />
 		<Router>
 				<Switch>
 					<Route path="/dashboard" exact component={Dashboard} />
 					<Route path="/bills" exact component={Bills} />
+					<Route path="/giftcards" exact component={GiftCards} />
 					<Route path="/rides" exact component={Rides} />
 					<Route path="/groceries" exact component={Groceries} />
 					<Route path="/foods" exact component={Foods} />
@@ -54,8 +58,10 @@ function App() {
 					<Route path="/forgot-password" component={Forgot} />
 					<Route exact path="/reset" component={Forgot} />
 					<Route path="/reset/:token" component={ResetPassword} /> {/* Updated Route */}
+					<Route path="/verify/:token" component={Welcome} /> {/* Updated Route */}
 				</Switch>
-			</Router>
+			</Router>		
+		</div>
 		</>
 			
 		//  </LoadScript>

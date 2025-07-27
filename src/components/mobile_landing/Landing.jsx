@@ -99,7 +99,7 @@ const styles = {
 		flexDirection: 'column',
 		alignItems: 'center',
 		justifyContent: 'center',
-		height: '100vh',
+		height: '90vh',
 		textAlign: 'center',
 		backgroundColor: '#f0f0f0',
 	},

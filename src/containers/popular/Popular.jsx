@@ -6,14 +6,14 @@ import axios from "axios";
 import { DealContext } from "../../DealContext";
 import fallbackImage from "../../assets/placeholder.webp"; // ✅ Fallback image
 
-const Popular = () => {
+const Popular = ({user, showCart, setShowCart ,showCheckout, setShowCheckout, selectedItem, setSelectedItem, userCoords}) => {
   const hasInitialized = useRef(false);
   const [liked, setLiked] = useState({});
-  const [selectedItem, setSelectedItem] = useState(null);
+  // const [selectedItem, setSelectedItem] = useState(null);
   // const [cart, setCart] = useState({});
   const [quantity, setQuantity] = useState(1);
-  const [showCart, setShowCart] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
+  // const [showCart, setShowCart] = useState(false);
+  // const [showCheckout, setShowCheckout] = useState(false);
   const [total, setTotal] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -46,6 +46,97 @@ const Popular = () => {
 
   const getBaseUrl = () => `${import.meta.env.VITE_API_BASE_URL}/api`;
 
+const [manualLat, setManualLat] = useState('');
+const [manualLng, setManualLng] = useState('');
+const [locationError, setLocationError] = useState('');
+  const [pickupQuery, setPickupQuery] = useState('');
+    const [dropoffQuery, setDropoffQuery] = useState('');
+    const [pickupSuggestions, setPickupSuggestions] = useState([]);
+    const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
+    const [pickupCoords, setPickupCoords] = useState(null);
+    const [dropoffCoords, setDropoffCoords] = useState(null);
+
+// 	useEffect(() => {
+//   const getUserLocation = () => {
+//     if (!navigator.geolocation) {
+//       console.warn("Geolocation is not supported by this browser.");
+//       return;
+//     }
+
+//   navigator.geolocation.getCurrentPosition(
+//   (position) => {
+//     const { latitude, longitude } = position.coords;
+//     setUserCoords({ lat: latitude, lng: longitude });
+//     getLocationName(latitude, longitude);
+//   },
+//   (error) => {
+//     console.error("Error retrieving location:", error);
+//     fallbackToManualLocation(); // custom handler
+//   },
+//   {
+//     enableHighAccuracy: true,
+//     timeout: 10000,       // wait max 10 seconds
+//     maximumAge: 0         // never use cached location
+//   }
+// );
+//   };
+
+//   getUserLocation();
+// }, []);
+
+// useEffect(() => {
+//   const getBrowserLocation = () => {
+//     if (!navigator.geolocation) {
+//       setLocationError("Geolocation is not supported by this browser.");
+//       getIPFallback();
+//       return;
+//     }
+//     navigator.geolocation.getCurrentPosition(
+//       (position) => {
+//         const { latitude, longitude } = position.coords;
+//         // console.log("Current Position:", { latitude, longitude }); // ✅ Console log here
+//         setUserCoords({ lat: latitude, lng: longitude });
+//       },
+//       (error) => {
+//         console.warn("Browser GPS failed:", error.message);
+//         setLocationError("Using fallback location via IP.");
+//         getIPFallback();
+//       },
+//       {
+//         enableHighAccuracy: true,
+//         timeout: 10000,
+//         maximumAge: 0,
+//       }
+//     );
+//   };
+
+//   const getIPFallback = async () => {
+//     try {
+//       const res = await fetch('https://ipapi.co/json/');
+//       const data = await res.json();
+//       if (data && data.latitude && data.longitude) {
+//         setUserCoords({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) });
+//       } else {
+//         setLocationError("IP location service failed.");
+//       }
+//     } catch (err) {
+//       console.error("IP fallback error:", err.message);
+//       setLocationError("Failed to retrieve location by all means.");
+//     }
+//   };
+
+//   getBrowserLocation();
+// }, []);
+
+
+useEffect(() => {
+  // console.log(userCoords);
+  if (userCoords) {
+    fetchMenuItems(userCoords.lat, userCoords.lng);
+  }
+}, [userCoords]);
+
+
   const getCookie = (name) => {
     const match = document.cookie.match(
       new RegExp("(^| )" + name + "=([^;]+)")
@@ -68,13 +159,19 @@ const Popular = () => {
     }
   }, []);
 
-  // Fetch popular items
-  useEffect(() => {
-    const fetchMenuItems = async () => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-      try {
-        const response = await axios.get(`${getBaseUrl()}/menu/popular`);
+  const fetchMenuItems = async () => {
+    // if (hasInitialized.current) return;
+    //  if (hasInitialized.current) return;
+    // hasInitialized.current = true;
+    if(userCoords){
+     try {
+        // const response = await axios.get(`${getBaseUrl()}/menu/popular`);
+        const response = await axios.get(`${getBaseUrl()}/menu/popular`, {
+          params: {
+            lat: userCoords.lat,
+            lng: userCoords.lng,
+          },
+        });
         setPopularItems(
           Array.isArray(response.data.data) ? response.data.data : []
         );
@@ -85,10 +182,41 @@ const Popular = () => {
       } finally {
         setLoading(false);
       }
+    }
+ 
     };
 
-    fetchMenuItems();
-  }, []);
+  // Fetch popular items
+  // useEffect(() => {
+  //   const fetchMenuItems = async () => {
+  //   // if (hasInitialized.current) return;
+  //    if (hasInitialized.current) return;
+  //   hasInitialized.current = true;
+  //   if(userCoords){
+  //    try {
+  //       // const response = await axios.get(`${getBaseUrl()}/menu/popular`);
+  //       const response = await axios.get(`${getBaseUrl()}/menu/popular`, {
+  //         params: {
+  //           lat: userCoords.lat,
+  //           lng: userCoords.lng,
+  //         },
+  //       });
+  //       setPopularItems(
+  //         Array.isArray(response.data.data) ? response.data.data : []
+  //       );
+  //       // console.log(response);
+  //     } catch (error) {
+  //       console.error("Error fetching menu:", error);
+  //       setFetchError("Failed to load menu");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+ 
+  //   };
+
+  //   // fetchMenuItems();
+  // }, []);
 
   const toggleLike = (itemName) => {
     setLiked((prev) => ({ ...prev, [itemName]: !prev[itemName] }));
@@ -191,7 +319,9 @@ const Popular = () => {
     ),
   }));
 
+
   const makeOrder = async () => {
+    console.log('confirm');
     for (const payload of checkoutPayloads) {
       try {
         const response = await axios.post(
@@ -223,11 +353,39 @@ const Popular = () => {
   // UI rendering comes here...
   return (
     <div className="">
+      {locationError && (
+  <div style={{ padding: "1rem", background: "#fff8dc", border: "1px solid #ccc" }}>
+    <p>{locationError}</p>
+    <p>You can manually set your location:</p>
+    <input
+      type="number"
+      placeholder="Latitude"
+      value={manualLat}
+      onChange={(e) => setManualLat(e.target.value)}
+    />
+    <input
+      type="number"
+      placeholder="Longitude"
+      value={manualLng}
+      onChange={(e) => setManualLng(e.target.value)}
+    />
+    <button
+      onClick={() => {
+        if (manualLat && manualLng) {
+          setUserCoords({ lat: parseFloat(manualLat), lng: parseFloat(manualLng) });
+        }
+      }}
+    >
+      Set Location
+    </button>
+  </div>
+)}
+
       {loading ? (
         <div className="flex flex-col">
-          <h2 className="text-lg font-medium text-gray-800 mb-2">
+          {/* <h2 className="text-lg font-medium text-gray-800 mb-2">
             Popular this week
-          </h2>
+          </h2> */}
           <div className="flex flex-row gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap p-2 scrollbar-hide">
             {Array.from({ length: 4 }).map((_, i) => (
               <SkeletonFoodCard key={i} />
@@ -235,10 +393,10 @@ const Popular = () => {
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-gray-100 rounded-2xl shadow-md overflow-x-auto whitespace-nowrap">
+        <div>
           <Toaster position="top-right" reverseOrder={true} />
           {Array.isArray(popularItems) && popularItems.length > 0 ? (
-            <div>
+            <div className="p-4 bg-gray-100 rounded-2xl shadow-md overflow-x-auto whitespace-nowrap">
               <h2 className="text-lg font-medium text-gray-800 mb-2">
                 Popular this week
               </h2>
@@ -280,12 +438,13 @@ const Popular = () => {
               </div>
             </div>
           ) : (
-            <div className="text-gray-500">No popular items found.</div>
+            // <div className="text-gray-500">No popular items found.</div>
+            <div className=""></div>
           )}
 
           {selectedItem && (
-            <div className="fixed inset-0 bg-white flex flex-col mt-10 py-6 overflow-auto">
-              <div className="bg-[#0000004b] p-1 flex items-center justify-center rounded-3xl absolute top-10 right-4">
+            <div className="fixed inset-0 bg-white flex flex-col mt-12 py-6 overflow-auto">
+              <div className="bg-[#0000004b] p-1 flex items-center justify-center rounded-3xl absolute top-12 right-4">
                 <button
                   className=" text-gray-200  hover:text-gray-800"
                   onClick={() => setSelectedItem(null)}
@@ -333,6 +492,7 @@ const Popular = () => {
                     </span>
                   </div>
                 </div>
+                {selectedItem.vendor_status === 1 ? (
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
@@ -344,7 +504,15 @@ const Popular = () => {
                   className="w-full mt-4 bg-gray-800 text-white py-4 rounded-full hover:bg-gray-600"
                 >
                   {isUpdating ? "Update Cart" : "Add to Cart"}
-                </motion.button>
+                </motion.button>):(
+                   <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      className="w-full mt-4 bg-gray-800 text-white py-4 rounded-full hover:bg-gray-600 disabled"
+                      disabled
+                   >
+                    Vendor is offline!
+                  </motion.button>
+                )}
               </div>
             </div>
           )}
@@ -352,17 +520,17 @@ const Popular = () => {
         {!showCart && (
           <button
             className="fixed bottom-24 right-6 bg-gray-800 text-white p-4 rounded-full"
-            onClick={() => {setShowCart(true); console.log('popular');}}
+            onClick={() => {setShowCart(true);}}
           >
             <ShoppingCart size={24} />
           </button>
         )}
           {showCart && (
-            <div className="fixed inset-0 bg-white flex flex-col mt-10 py-6 overflow-auto mb-16">
+            <div className="fixed inset-0 bg-white flex flex-col mt-20 py-6 overflow-auto mb-16">
               <div className="relative top-3 left-7 mb-6 font-bold text-xl">
                 <h3>My order</h3>
               </div>
-              <div className="bg-[#0000001f] p-1 flex items-center justify-center rounded-3xl absolute top-8 right-4">
+              <div className="bg-[#0000001f] p-1 flex items-center justify-center rounded-3xl absolute top-12 right-4">
                 <button
                   className="text-gray-600 hover:text-gray-800"
                   onClick={() => setShowCart(false)}
@@ -553,7 +721,7 @@ const Popular = () => {
                           setTotal(formatPrice(total));
                           setShowCheckout(true);
                         }}
-                        className="bg-gray-200 text-gray-600 px-2 py-2  rounded-md hover:text-gray-800"
+                        className="bg-green-400 text-gray-50 px-2 py-2  rounded-md hover:text-gray-800"
                       >
                         Proceed to Checkout
                       </button>
@@ -565,9 +733,9 @@ const Popular = () => {
           )}
 
           {showCheckout && (
-            <div className="fixed inset-0 bg-white flex flex-col mt-10 pb-28 overflow-auto">
+            <div className="fixed inset-0 bg-white flex flex-col mt-16 pb-28 overflow-auto">
               <div className="px-6 pt-9 pb-3 flex justify-between items-center border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-800">Checkout</h2>
+                <h2 className="text-xl font-bold text-gray-800">Checkout popular</h2>
                 <button
                   onClick={() => setShowCheckout(false)}
                   className="text-gray-600 hover:text-red-500 transition"
@@ -638,11 +806,17 @@ const Popular = () => {
                         Phone Number
                       </label>
                     </div>
-                    <div className="relative">
+                    {/* <div className="relative">
                       <textarea
                         name="address"
-                        value={formData.address}
-                        onChange={handleFormChange}
+                        // value={formData.address}
+                        // onChange={handleFormChange}
+                          value={pickupQuery}
+                          onChange={(e) => {
+                          const newValue = e.target.value;
+                          setPickupQuery(newValue);
+                          fetchSuggestions(newValue, setPickupSuggestions, userCoords);
+                        }}
                         rows="2"
                         placeholder=" "
                         className="peer w-full border-b border-gray-300 focus:outline-none focus:border-gray-800 py-2 placeholder-transparent"
@@ -650,7 +824,34 @@ const Popular = () => {
                       <label className="absolute left-0 -top-3 text-gray-500 text-sm transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-sm">
                         Delivery Address
                       </label>
-                    </div>
+                    </div> */}
+                          <div className="relative">
+       <input
+  type="text"
+  value={pickupQuery}
+  // onChange={(e) => setPickupQuery(e.target.value)}
+  onChange={(e) => {
+  const newValue = e.target.value;
+  setPickupQuery(newValue);
+  fetchSuggestions(newValue, setPickupSuggestions, userCoords);
+}}
+  placeholder="Enter pickup location"
+  className="w-full border px-2 py-1"
+/>
+        {pickupSuggestions.length > 0 && (
+          <ul className="bg-white border">
+            {pickupSuggestions.map((item, index) => (
+              <li
+                key={index}
+                className="p-2 hover:bg-gray-200 cursor-pointer"
+                onClick={() => handleSelect(item, setPickupCoords, setPickupQuery, true)}
+              >
+                {item.title}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
                     <div className="relative">
                       <textarea
                         name="note"

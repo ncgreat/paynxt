@@ -11,6 +11,7 @@ export function DealProvider({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettings, setIsSettings] = useState(false);
   const [viewMore, setViewMore] = useState(false);
+  const [parentMenu, setParentMenu] = useState(null); // NEW
 
   const [settings, setSettings] = useState({
     darkMode: false,
@@ -135,6 +136,24 @@ export function DealProvider({ children }) {
         setIsSettings,
         viewMore,
         setViewMore,
+
+        parentMenu,
+        setParentMenu, // ✅ Add this
+
+        isModalOpen: false,
+        setIsModalOpen: () => {},
+
+
+        showCart: false,
+        setShowCart: () => {},
+        showCheckout: false,
+        setShowCheckout: () => {},
+        selectedItem: false,
+        setSelectedItem: () => {},
+        selectedStore: false,
+        setSelectedStore: () => {},
+        isChosen: false,
+        setIsChosen: () => {},
 
         // Settings
         settings,

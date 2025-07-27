@@ -17,6 +17,17 @@ import { useSwipeable } from 'react-swipeable';
 import 'sweetalert2/dist/sweetalert2.min.css'; // Base styling
 
 
+/*redesign imports*/
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card } from "../../components/ui/card";
+// import { Badge } from "../../components/ui/badge";
+import {  Button, CardContent, Input, Label, Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/";
+import { ArrowLeft, Search, Zap, Wifi, Phone, Smartphone, GraduationCap, Tv, Trophy } from "lucide-react";
+/* end redesign imports */ 
 
 
 import { IoTicketOutline, IoCheckbox } from 'react-icons/io5';
@@ -69,7 +80,7 @@ import neco from '../../assets/neco.png';
 import nabteb from '../../assets/nabteb.png';
 import logo from '../../assets/logo.png';
 
-const Actions = ({ user }) => {
+const Actions = ({ user, isModalOpen, setIsModalOpen }) => {
 	// console.log(user.account.transaction_pin);
 
   	const hasInitialized = useRef(false);
@@ -86,7 +97,7 @@ const Actions = ({ user }) => {
 	const [isEd, setIsEd] = useState(false);
 	const [isJAMB, setIsJAMB] = useState(false);
 	const [isWAEC, setIsWAEC] = useState(false);
-	const [isModalOpen, setIsModalOpen] = useState(false);
+	// const [isModalOpen, setIsModalOpen] = useState(false);
 	const [networkSelected, setNetworkSelected] = useState('');
 	const [dataPlans, setDataPlans] = useState([]);
 	const [servicePlans, setServicePlans] = useState([]);
@@ -430,14 +441,26 @@ const Actions = ({ user }) => {
 	// console.log(loggedUser.transaction_pin);
 	// console.log(account);
 	// console.log(loggedUser);
-	// if(user.user == ''){
-	// 	user = loggedUser.user
-	// }
+	if(user.user == ''){
+		user = loggedUser.user
+	}
 	user=user? user.user : loggedUser.user;
+    let old_balance = 0;
+    let new_balance = 0;
+    const isAdmin = loggedUser?.user?.role === '1'; // assumes `role` is on user object
+	// // console.log(user);
 
-	// console.log(user);
+	// let first_name = user.name.split(' ')[0];
 
-	let first_name = user.name.split(' ')[0];
+	//  let loggeduser=user? user.user : loggedUser.user;
+
+	// // console.log(balance);
+	// // console.log(currentBalance);
+	// let first_name = '';
+	// if(loggeduser){
+	// 	first_name = loggeduser?.name.split(' ')[0];
+	// }
+
 
 	const getBaseUrl = () => {
 		return `${import.meta.env.VITE_API_BASE_URL}/api`;
@@ -729,7 +752,7 @@ const swipeHandlers = useSwipeable({
 
 	useEffect(() => {
 
-		getTransactions();
+		// getTransactions();
 		// setIsLoaded(false);
 		setLoading(false);
 
@@ -784,9 +807,9 @@ useEffect(() => {
 //   }, [selectedPlanId]);
 
 var role;
-if(user.id === 3){
+if(user?.id === 3){
 role = 'admin';
-}else if(user.role === "2"){
+}else if(user?.role === "2"){
 	role = 'shop_user';
 }else{
 	role = 'user';
@@ -828,39 +851,6 @@ useEffect(() => {
 	fetchTransactions();
 }, []);
 
-  
-
-
-	const getTransactions = async () => {
-		setLoading(true);
-		try {
-			const response = await fetch(`${getBaseUrl()}/get_transactions?page=${currentPage}&limit=5`, {
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${localStorage.getItem("token")}`, // Ensure token is included
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					_id: user.id,
-				}),
-			});
-			const data = await response.json();
-			setUserTransactions(data.transactions);
-			// console.log(data.transactions);
-			if(JSON.stringify(data.transactions) !== "[]"){
-				setTotalPages(data.totalPages);
-			}else{
-				setTotalPages(0);
-			}
-			
-			// console.log(data);
-			setLoading(false);
-		
-		} catch (error) {
-			// console.error("Error fetching transactions:", error);
-			setLoading(false);
-		}
-	};
 
 
 	const sendOtp = async () => {
@@ -912,13 +902,6 @@ useEffect(() => {
 		  setLoading(false);
 		}
 	  };
-
-	//   useEffect(() => {
-	// 	if(servicePlans.length>0) {
-	// 		console.log(servicePlans);
-	// 	}
-	  
-	//   }, [servicePlans])
 	  
 	  
 	  useEffect(() => {
@@ -1174,29 +1157,60 @@ const buyCable = async () => {
 
     try {
         // Get Wallet Balance
-        const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wallet_id: user.id }),
-        });
+        // const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ wallet_id: user.id }),
+        // });
 
-        const walletData = await walletResponse.json();
-        let old_balance = parseFloat(walletData?.available_balance || 0);
+        // const walletData = await walletResponse.json();
+        // let old_balance = parseFloat(walletData?.available_balance || 0);
 
-        // Check if balance is sufficient
-        if (old_balance < bundleAmount) {
-            Swal.fire({
-                title: 'Insufficient Balance',
-                text: `You need at least NGN ${bundleAmount} to proceed.`,
-                icon: 'error',
-                customClass: { container: 'borderless' },
-            });
-            setIsDisabled(false);
-            return;
-        }
+        // // Check if balance is sufficient
+        // if (old_balance < bundleAmount) {
+        //     Swal.fire({
+        //         title: 'Insufficient Balance',
+        //         text: `You need at least NGN ${bundleAmount} to proceed.`,
+        //         icon: 'error',
+        //         customClass: { container: 'borderless' },
+        //     });
+        //     setIsDisabled(false);
+        //     return;
+        // }
+        // let new_balance = old_balance - bundleAmount;
+			if (!isAdmin) {
+				// 🔒 Normal users require balance checks
+				const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ wallet_id: user.id }),
+				});
+				const walletData = await walletResponse.json();
+				old_balance = parseFloat(walletData?.available_balance || 0);
+
+				if (old_balance < bundleAmount) {
+					Swal.fire({
+						title: 'Insufficient Balance',
+						text: `You need at least NGN ${bundleAmount} to proceed.`,
+						icon: 'error',
+						customClass: { container: 'borderless' },
+					});
+					setIsDisabled(false);
+					setIsModalOpen(false);
+					return;
+				}
+
+				new_balance = old_balance - bundleAmount;
+				console.log(new_balance);
+			} else {
+				// 🛡️ Admin bypass: simulate 0 deduction
+				old_balance = 0;
+				new_balance = 0;
+				console.log(new_balance);
+			}
 
         // Deduct balance & Log transaction as "Pending"
-        let new_balance = old_balance - bundleAmount;
+
         const transactionResponse = await fetch(`${getBaseUrl()}/add_transaction`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1300,158 +1314,6 @@ const buyCable = async () => {
     }
 };
 
-
-	const buyCable_b = async() => {
-		
-		const biller_code = codeRef.current.value;
-		const variation_code = selectedPlan;
-		const service_id = selectedIcon;
-		let subscription_type = "renew"; // Default subscription type is renew unless explicitly stated otherwise
-		let bundleAmount = amount.replace(/[^\d.]/g, ""); // Removes all non-numeric characters;
-		// console.log(variation_code);
-		let current_package = currentPackage.split(' + ');
-		
-		if (variation_code.name !== current_package[0] ) {
-            subscription_type = "change"; // No change in plan, so it's a renewal
-
-        } else {
-            subscription_type = "renew"; // Change in plan, so it's a change subscription
-        }
-
-		try {
-			// setIsLoading(true); // Set loading to true when the process starts
-
-			// Get Wallet Balance
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					wallet_id: user.id,
-				}),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0); 
-			// const wallet = JSON.parse(localStorage.getItem('wallet'));
-			// let old_balance = parseFloat(wallet?.available_balance || 0);
-
-			// Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
-				});
-				setIsDisabled(false);
-				return;
-			}
-
-			// const response = await fetch("http://127.0.0.1:8000/api/vtservices_buy", {
-			const response = await fetch(`${getBaseUrl()}/vtservices_buy`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					service_id,
-					phone: phoneNumber,
-					biller_code,
-					variation_code: variation_code.variation_code,
-					subscription_type,
-				}),
-			});
-			const data = await response.json();
-			console.log(data);
-			if (data.status === 'success') {
-				console.log(data.data.content.transactions.phone);
-				// Update the database or perform any additional actions if needed
-				const wallet = JSON.parse(localStorage.getItem('wallet'));
-				let old_balance = wallet.available_balance;
-				let new_balance = old_balance - bundleAmount;
-
-				const updatedb = await fetch(`${getBaseUrl()}/add_transaction`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						category: 'CableTV',
-						service: service_id,
-						amount: data.data.amount,
-						phone_num: data.data.content.transactions.phone,
-						transaction_id: data.data.content.transactions.transactionId,
-						prev_balance: old_balance,
-						new_balance: new_balance,
-						status: 'Successful',
-						user_id: user.id,
-					}),
-				});
-				
-	
-				if (updatedb) {
-					// ✅ Update React Context balance
-					setLoggedUser(prev => ({
-						...prev,
-						wallet: {
-						...prev.wallet,
-						available_balance: new_balance
-						}
-					}));
-					// updateBalance(bundleAmount);
-					// localStorage.setItem('wallet', JSON.stringify(wallet));
-				
-					Swal.fire({
-						title: 'Transaction Approved',
-						text: 'Your purchase was completed successfully',
-						icon: 'success',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				} 
-				else {
-					Swal.fire({
-						title: 'Transaction Failed',
-						text: 'Your purchase could not be completed!',
-						icon: 'error',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				}
-				setIsModalOpen(false);
-			}else if(data.status === 'processing'){
-				Swal.fire({
-                    title: 'Transaction Processing',
-                    text: 'Your purchase is being processed. Please wait.',
-                    icon: 'info',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}else{
-				Swal.fire({
-                    title: 'Transaction Failed',
-                    text: 'Failed to process your purchase. Please try again later.',
-                    icon: 'error',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}
-
-		} catch (error) {
-			alert('Error:', error);
-		}finally{
-			// setIsLoading(false); // Set loading to false when the process ends
-		}
-				
-	};
-
 	const buyBetting = async () => {
 		let bundleAmount = parseFloat(amountRef.current.value);
 		const bet_id = selectedIcon;
@@ -1462,27 +1324,57 @@ const buyCable = async () => {
 			setIsDisabled(true);
 	
 			// 1️⃣ Get Wallet Balance
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ wallet_id: user.id }),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0);
+			// const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ wallet_id: user.id }),
+			// });
+			// const walletData = await walletResponse.json();
+			// let old_balance = parseFloat(walletData?.available_balance || 0);
 	
-			// 2️⃣ Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
+			// // 2️⃣ Check if balance is sufficient
+			// if (old_balance < bundleAmount) {
+			// 	Swal.fire({
+			// 		title: 'Insufficient Balance',
+			// 		text: `You need at least NGN ${bundleAmount} to proceed.`,
+			// 		icon: 'error',
+			// 		customClass: { container: 'borderless' },
+			// 	});
+			// 	setIsDisabled(false);
+			// 	return;
+			// }
+	
+			// let new_balance = old_balance - bundleAmount;
+			if (!isAdmin) {
+				// 🔒 Normal users require balance checks
+				const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ wallet_id: user.id }),
 				});
-				setIsDisabled(false);
-				return;
+				const walletData = await walletResponse.json();
+				old_balance = parseFloat(walletData?.available_balance || 0);
+
+				if (old_balance < bundleAmount) {
+					Swal.fire({
+						title: 'Insufficient Balance',
+						text: `You need at least NGN ${bundleAmount} to proceed.`,
+						icon: 'error',
+						customClass: { container: 'borderless' },
+					});
+					setIsDisabled(false);
+					setIsModalOpen(false);
+					return;
+				}
+
+				new_balance = old_balance - bundleAmount;
+				console.log(new_balance);
+			} else {
+				// 🛡️ Admin bypass: simulate 0 deduction
+				old_balance = 0;
+				new_balance = 0;
+				console.log(new_balance);
 			}
-	
-			let new_balance = old_balance - bundleAmount;
 	
 			// 3️⃣ Add a "Pending" Transaction
 			const transactionResponse = await fetch(`${getBaseUrl()}/add_transaction`, {
@@ -1584,152 +1476,6 @@ const buyCable = async () => {
 	};
 	
 
-	const buyBetting_b = async() => {
-		
-		let bundleAmount = amountRef.current.value;
-		// console.log(variation_code);
-		const bet_id = selectedIcon;
-		const customer_id = customerCode;
-		const customer_name = customerName;
-		// console.log(bundleAmount);
-		
-		try {
-			setIsDisabled(true);
-			// setIsLoading(true); // Set loading to true when the process starts
-
-			// Get Wallet Balance
-			// Fetch the latest wallet balance from the server
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					wallet_id: user.id,
-				}),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0); 
-
-			// Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
-				});
-				setIsDisabled(false);
-				return;
-			}
-			
-
-			// const response = await fetch("http://127.0.0.1:8000/api/vtservices_buy", {
-			const response = await fetch(`${getBaseUrl()}/payscribe_buy`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					bet_id,
-					customer_id,
-					customer_name,
-					amount: bundleAmount,
-				}),
-			});
-			const data = await response.json();
-			console.log(data);
-			if (data.status === true || data.message.details.transactions.status === 'success') {
-				// Update the database or perform any additional actions if needed
-				const wallet = JSON.parse(localStorage.getItem('wallet'));
-				let old_balance = wallet.available_balance;
-				let new_balance = old_balance - bundleAmount;
-
-				const updatedb = await fetch(`${getBaseUrl()}/add_transaction`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						category: 'Betting',
-						service: selectedIcon,
-						amount: bundleAmount,
-						phone_num: account,
-						transaction_id: data.message.details.trans_id,
-						prev_balance: old_balance,
-						new_balance: new_balance,
-						status: 'Successful',
-						user_id: user.id,
-					}),
-				});
-				
-	
-				if (updatedb) {
-					// ✅ Update React Context balance
-					setLoggedUser(prev => ({
-						...prev,
-						wallet: {
-						...prev.wallet,
-						available_balance: new_balance
-						}
-					}));
-					// updateBalance(bundleAmount);
-					// const wallet = JSON.parse(localStorage.getItem('wallet'));
-					// let old_balance = wallet.available_balance;
-					// let new_balance = old_balance - amount;
-					// wallet.available_balance = new_balance.toString();
-					// localStorage.setItem('wallet', JSON.stringify(wallet));
-				
-					Swal.fire({
-						title: 'Transaction Approved',
-						text: 'Your purchase was completed successfully',
-						icon: 'success',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				} 
-				else {
-					Swal.fire({
-						title: 'Transaction Failed',
-						text: 'Your purchase could not be completed!',
-						icon: 'error',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				}
-				setIsModalOpen(false);
-			}else if(data.status === 'processing'){
-				Swal.fire({
-                    title: 'Transaction Processing',
-                    text: 'Your purchase is being processed. Please wait.',
-                    icon: 'info',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}else{
-				Swal.fire({
-                    title: 'Transaction Failed',
-                    text: 'Failed to process your purchase. Please try again later.',
-                    icon: 'error',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}
-
-		} catch (error) {
-			alert('Error:', error);
-		}finally{
-			// setIsLoading(false); // Set loading to false when the process ends
-		}
-				
-	};
-
 	const buyEdu = async() => {
 		// alert(edCategory);
 		if(edCategory === 'JAMB'){
@@ -1776,27 +1522,57 @@ const buyCable = async () => {
 			setIsLoading(true);
 	
 			// Get Wallet Balance
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ wallet_id: user.id }),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0);
+			// const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ wallet_id: user.id }),
+			// });
+			// const walletData = await walletResponse.json();
+			// let old_balance = parseFloat(walletData?.available_balance || 0);
 	
-			// Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
+			// // Check if balance is sufficient
+			// if (old_balance < bundleAmount) {
+			// 	Swal.fire({
+			// 		title: 'Insufficient Balance',
+			// 		text: `You need at least NGN ${bundleAmount} to proceed.`,
+			// 		icon: 'error',
+			// 		customClass: { container: 'borderless' },
+			// 	});
+			// 	setIsLoading(false);
+			// 	return;
+			// }
+	
+			// let new_balance = old_balance - bundleAmount;
+			if (!isAdmin) {
+				// 🔒 Normal users require balance checks
+				const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ wallet_id: user.id }),
 				});
-				setIsLoading(false);
-				return;
+				const walletData = await walletResponse.json();
+				old_balance = parseFloat(walletData?.available_balance || 0);
+
+				if (old_balance < bundleAmount) {
+					Swal.fire({
+						title: 'Insufficient Balance',
+						text: `You need at least NGN ${bundleAmount} to proceed.`,
+						icon: 'error',
+						customClass: { container: 'borderless' },
+					});
+					setIsDisabled(false);
+					setIsModalOpen(false);
+					return;
+				}
+
+				new_balance = old_balance - bundleAmount;
+				console.log(new_balance);
+			} else {
+				// 🛡️ Admin bypass: simulate 0 deduction
+				old_balance = 0;
+				new_balance = 0;
+				console.log(new_balance);
 			}
-	
-			let new_balance = old_balance - bundleAmount;
 	
 			// Add a "Pending" Transaction
 			const transactionResponse = await fetch(`${getBaseUrl()}/add_transaction`, {
@@ -1892,195 +1668,6 @@ const buyCable = async () => {
 			setIsLoading(false);
 		}
 	};
-	
-
-
-	const buyEd_b = async() => {
-		const biller_code = codeRef.current.value;
-		let variation_code = selectedPlan.variation_code;
-		const service_id = edCategory;	
-		let bundleAmount = amount.replace(/[^\d.]/g, ""); // Removes all non-numeric characters
-		
-		if(variation_code === null || variation_code === '' || !variation_code){
-			variation_code = 'utme';
-		}
-
-		try {
-			setIsLoading(true); // Set loading to true when the process starts
-
-			// Get Wallet Balance
-			// Fetch the latest wallet balance from the server
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					wallet_id: user.id,
-				}),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0); 
-
-			// Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
-				});
-				setIsDisabled(false);
-				return;
-			}
-
-			const response = await fetch(`${getBaseUrl()}/vtservices_buy`, {
-			// const response = await fetch("http://127.0.0.1:8000/api/vtservices_buy", {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					service_id,
-					phone: phoneNumber,
-					amount: bundleAmount,
-					biller_code,
-					variation_code,
-				}),
-			});
-			const data = await response.json();
-			console.log(data);
-			if (data.status === 'success') {
-				console.log(data.data.content.transactions.phone);
-				// Update the database or perform any additional actions if needed
-				const wallet = JSON.parse(localStorage.getItem('wallet'));
-				let old_balance = wallet.available_balance;
-				let new_balance = old_balance - bundleAmount;
-
-				const updatedb = await fetch(`${getBaseUrl()}/add_transaction`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						category: 'Educational',
-						service: service_id,
-						amount: data.data.content.transactions.amount,
-						phone_num: data.data.content.transactions.phone,
-						prev_balance: old_balance,
-						new_balance: new_balance,
-						transaction_id: data.data.content.transactions.transactionId,
-						status: 'Successful',
-						user_id: user.id,
-					}),
-				});
-				if (updatedb) {
-					// updateBalance(amount);
-					// const wallet = JSON.parse(localStorage.getItem('wallet'));
-					// let old_balance = wallet.available_balance;
-					// let new_balance = old_balance - bundleAmount;
-					// wallet.available_balance = new_balance.toString();
-					// localStorage.setItem('wallet', JSON.stringify(wallet));
-
-					// ✅ Update React Context balance
-					setLoggedUser(prev => ({
-						...prev,
-						wallet: {
-						...prev.wallet,
-						available_balance: new_balance
-						}
-					}));
-				
-
-					   // Create receipt content
-					const receiptContent = `
-					<div id="receiptContent">
-						<h3>Transaction Receipt</h3>
-						<p><strong>PIN:</strong> ${data.data.purchased_code}</p>
-						<p><strong>Phone:</strong> ${data.data.content.transactions.phone}</p>
-						<p><strong>Profile ID:</strong> ${data.data.content.transactions.unique_element}</p>
-						<p><strong>Amount:</strong> ${data.data.amount}</p>
-						<p>${data.data.Pin}</p>
-					</div>
-				`;
-
-					Swal.fire({
-					title: 'Transaction Approved',
-					html: receiptContent + `
-						<br/>
-						<button id="printReceipt" class="swal2-confirm swal2-styled" style="background-color: #4CAF50;">Print</button>
-						<button id="exportPDF" class="swal2-confirm swal2-styled" style="background-color: #008CBA;">Export to PDF</button>
-					`,
-					icon: 'success',
-					customClass: {
-						container: 'borderless',
-					},
-					didOpen: () => {
-						document.getElementById('printReceipt').addEventListener('click', () => {
-							const printWindow = window.open('', '', 'width=600,height=600');
-							printWindow.document.write('<html><head><title>Receipt</title></head><body>');
-							printWindow.document.write(receiptContent);
-							printWindow.document.write('</body></html>');
-							printWindow.document.close();
-							printWindow.print();
-						});
-			
-						document.getElementById('exportPDF').addEventListener('click', async () => {
-							const { jsPDF } = await import('jspdf'); // Import jsPDF dynamically
-							const doc = new jsPDF();
-							doc.text('Transaction Receipt', 10, 10);
-							doc.text(`PIN: ${data.data.purchased_code}`, 10, 20);
-							doc.text(`Phone: ${data.data.content.transactions.phone}`, 10, 30);
-							doc.text(`Profile ID: ${data.data.content.transactions.unique_element}`, 10, 40);
-							doc.text(`Amount: ${data.data.amount}`, 10, 50);
-							doc.text(`${data.data.Pin}`, 10, 60);
-							doc.save('Transaction_Receipt.pdf');
-						});
-					},
-				});
-			}
-	
-				
-				else {
-					Swal.fire({
-						title: 'Transaction Failed',
-						text: 'Your purchase could not be completed!',
-						icon: 'error',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				}
-				setIsModalOpen(false);
-			}else if(data.status === 'processing'){
-				Swal.fire({
-                    title: 'Transaction Processing',
-                    text: 'Your purchase is being processed. Please wait.',
-                    icon: 'info',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}else{
-				Swal.fire({
-                    title: 'Transaction Failed',
-                    text: 'Failed to process your purchase. Please try again later.',
-                    icon: 'error',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}
-
-		} catch (error) {
-			alert('Error:', error);
-		}finally{
-			setIsLoading(false); // Set loading to false when the process ends
-		}
-				
-	};
 
 	const buyElectric = async () => {
 		const biller_code = codeRef.current.value;
@@ -2094,26 +1681,56 @@ const buyCable = async () => {
 			setIsLoading(true);
 	
 			// Fetch Wallet Balance
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ wallet_id: user.id }),
-			});
-			const walletData = await walletResponse.json();
-			const old_balance = parseFloat(walletData?.available_balance || 0);
+			// const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ wallet_id: user.id }),
+			// });
+			// const walletData = await walletResponse.json();
+			// const old_balance = parseFloat(walletData?.available_balance || 0);
 	
-			// Check balance sufficiency
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
-				});
-				return;
-			}
+			// // Check balance sufficiency
+			// if (old_balance < bundleAmount) {
+			// 	Swal.fire({
+			// 		title: 'Insufficient Balance',
+			// 		text: `You need at least NGN ${bundleAmount} to proceed.`,
+			// 		icon: 'error',
+			// 		customClass: { container: 'borderless' },
+			// 	});
+			// 	return;
+			// }
 
-			let new_balance = old_balance - bundleAmount;
+			// let new_balance = old_balance - bundleAmount;
+			if (!isAdmin) {
+				// 🔒 Normal users require balance checks
+				const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ wallet_id: user.id }),
+				});
+				const walletData = await walletResponse.json();
+				old_balance = parseFloat(walletData?.available_balance || 0);
+
+				if (old_balance < bundleAmount) {
+					Swal.fire({
+						title: 'Insufficient Balance',
+						text: `You need at least NGN ${bundleAmount} to proceed.`,
+						icon: 'error',
+						customClass: { container: 'borderless' },
+					});
+					setIsDisabled(false);
+					setIsModalOpen(false);
+					return;
+				}
+
+				new_balance = old_balance - bundleAmount;
+				console.log(new_balance);
+			} else {
+				// 🛡️ Admin bypass: simulate 0 deduction
+				old_balance = 0;
+				new_balance = 0;
+				console.log(new_balance);
+			}
 
 			//console.log(amount);
 	
@@ -2125,6 +1742,7 @@ const buyCable = async () => {
 					category: 'Electricity',
 					service: service_id,
 					amount: bundleAmount,
+					iuc_meter:billerCode? billerCode : '',
 					phone_num: phone,
 					transaction_id: `TXN_${Date.now()}`,
 					prev_balance: old_balance,
@@ -2167,12 +1785,13 @@ const buyCable = async () => {
 			if (data.status === 'success') {
 				const transaction = data.data.content.transactions;
 				const new_balance = old_balance - bundleAmount;
+				const token = data.data.Token;
 	
 				// Update transaction record
 				await fetch(`${getBaseUrl()}/update_transaction`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ transaction_id, status: 'Successful' }),
+					body: JSON.stringify({ transaction_id, token, status: 'Successful' }),
 				});
 	
 				// Update local storage balance
@@ -2322,240 +1941,6 @@ const buyCable = async () => {
 				
 			},
 		});
-	};
-	
-	const handleTransactionFailure = (status) => {
-		const messages = {
-			processing: 'Your purchase is being processed. Please wait.',
-			failed: 'Failed to process your purchase. Please try again later.',
-		};
-		Swal.fire({ title: 'Transaction Status', text: messages[status] || 'An error occurred.', icon: status === 'processing' ? 'info' : 'error' });
-	};
-	
-
-
-	const buyElectric_b = async() => {
-		const biller_code = codeRef.current.value;
-		const variation_code = selectedElectricPlan;
-		const service_id = selectedIcon;		
-		let bundleAmount = amount.replace(/[^\d.]/g, ""); // Removes all non-numeric characters
-		try {
-			setIsLoading(true); // Set loading to true when the process starts
-
-			// Get Wallet Balance
-			// Fetch the latest wallet balance from the server
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					wallet_id: user.id,
-				}),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0); 
-
-			// Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
-				});
-				setIsDisabled(false);
-				return;
-			}
-
-			const response = await fetch(`${getBaseUrl()}/vtservices_buy`, {
-			// const response = await fetch("http://127.0.0.1:8000/api/vtservices_buy", {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					service_id,
-					phone: phoneNumber,
-					amount,
-					biller_code,
-					variation_code,
-				}),
-			});
-			const data = await response.json();
-			console.log(data);
-			if (data.status === 'success') {
-				console.log(data.data.content.transactions.phone);
-				// Update the database or perform any additional actions if needed
-				const wallet = JSON.parse(localStorage.getItem('wallet'));
-				let old_balance = wallet.available_balance;
-				let new_balance = old_balance - bundleAmount;
-
-				const updatedb = await fetch(`${getBaseUrl()}/add_transaction`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						category: 'Electricity',
-						service: service_id,
-						amount: data.data.content.transactions.amount,
-						phone_num: data.data.content.transactions.phone,
-						transaction_id: data.data.content.transactions.transactionId,
-						prev_balance: old_balance,
-						new_balance: new_balance,
-						token: data.data.token,
-						status: 'Successful',
-						user_id: user.id,
-					}),
-				});
-	
-				
-				if (updatedb) {
-					// updateBalance(bundleAmount);
-					// const wallet = JSON.parse(localStorage.getItem('wallet'));
-					// let old_balance = wallet.available_balance;
-					// let new_balance = old_balance - amount;
-					// wallet.available_balance = new_balance.toString();
-					// localStorage.setItem('wallet', JSON.stringify(wallet));
-
-					// ✅ Update React Context balance
-					setLoggedUser(prev => ({
-						...prev,
-						wallet: {
-						...prev.wallet,
-						available_balance: new_balance
-						}
-					}));
-				
-
-					// Modern receipt content with logo
-					const receiptContent = `
-					<div id="receiptContent" style="font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; border-radius: 10px; border: 1px solid #ddd; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center;">
-					<h2 style="color: #4CAF50;">Transaction Receipt</h2>
-					<hr/>
-					<p style="font-size: 14px;"><strong>🔢 Token:</strong> ${data.data.token}</p>
-					<p style="font-size: 14px;"><strong>👤 Customer Name:</strong> ${data.data.customerName}</p>
-					<p style="font-size: 14px;"><strong>📍 Address:</strong> ${data.data.customerAddress}</p>
-					<p style="font-size: 14px;"><strong>💰 Amount:</strong> <span style="color: #008CBA;">₦${formatPrice(data.data.amount)}</span></p>
-					<p style="font-size: 14px;"><strong>⚡ Total Units:</strong> ${data.data.units} kWh</p>
-					<hr/>
-					<p style="text-align: center; font-size: 12px; color: gray;">Thank you for your purchase! 💡</p>
-					</div>
-					`;
-					Swal.fire({
-						title: 'Transaction Approved',
-						html: receiptContent + `
-						  <br/>
-						  <button id="printReceipt" class="swal2-confirm swal2-styled" style="background-color: #4CAF50;">🖨️ Print</button>
-						  <button id="exportPDF" class="swal2-confirm swal2-styled" style="background-color: #008CBA;">📄 Export to PDF</button>
-						`,
-						icon: 'success',
-						customClass: {
-							container: 'borderless',
-						},
-						didOpen: () => {
-						  // Print Receipt
-						  document.getElementById('printReceipt').addEventListener('click', () => {
-							const printWindow = window.open('', '', 'width=600,height=600');
-							printWindow.document.write('<html><head><title>Receipt</title></head><body style="text-align:center;">');
-							// printWindow.document.write(`<img src="${logo}" alt="paynxt" style="max-width: 120px; margin-bottom: 10px;">`);
-							printWindow.document.write(receiptContent);
-							printWindow.document.write('</body></html>');
-							printWindow.document.close();
-							printWindow.print();
-						  });
-					  
-						// Export to PDF
-						document.getElementById('exportPDF').addEventListener('click', async () => {
-							const { jsPDF } = await import('jspdf'); // Import jsPDF dynamically
-							const doc = new jsPDF();
-						
-							// Add Logo (Centered & Square)
-							if (logo) {
-								doc.addImage(logo, 'PNG', 75, 10, 40, 40); // Square logo
-							}
-						
-							// Header
-							doc.setFont("helvetica", "bold");
-							doc.setFontSize(16);
-							doc.text("Transaction Receipt", 65, 60); // Adjusted Y position
-							doc.setFontSize(12);
-							doc.setFont("helvetica", "normal");
-							doc.line(20, 65, 190, 65); // Horizontal line for separation
-						
-							// Transaction Details
-							const details = [
-								{ label: "Token", value: data.data.token },
-								{ label: "Name", value: data.data.customerName },
-								{ label: "Address", value: data.data.customerAddress },
-								{ label: "Amount", value: `NGN ${formatPrice(data.data.amount)}` },
-								{ label: "Total Units", value: `${data.data.units} kWh` },
-							];
-						
-							let y = 75; // Initial Y position (Adjusted for better spacing)
-							details.forEach((item) => {
-								doc.setFont("helvetica", "bold");
-								doc.text(`${item.label}:`, 20, y);
-								doc.setFont("helvetica", "normal");
-								doc.text(item.value.toString(), 70, y);
-								y += 12; // Increased line spacing
-							});
-						
-							// Footer with Extra Bottom Margin
-							doc.line(20, y + 5, 190, y + 5); // Footer separator
-							doc.setFontSize(10);
-							doc.setTextColor(100);
-							doc.text("Thank you for your purchase!", 70, y + 20); // Added extra bottom margin
-						
-							// Save PDF
-							doc.save("Transaction_Receipt.pdf");
-						});
-						
-
-						},
-					  });
-			}
-				
-				else {
-					Swal.fire({
-						title: 'Transaction Failed',
-						text: 'Your purchase could not be completed!',
-						icon: 'error',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				}
-				setIsModalOpen(false);
-			}else if(data.status === 'processing'){
-				Swal.fire({
-                    title: 'Transaction Processing',
-                    text: 'Your purchase is being processed. Please wait.',
-                    icon: 'info',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}else{
-				Swal.fire({
-                    title: 'Transaction Failed',
-                    text: 'Failed to process your purchase. Please try again later.',
-                    icon: 'error',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}
-
-		} catch (error) {
-			alert('Error:', error);
-		}finally{
-			setIsLoading(false); // Set loading to false when the process ends
-		}
-				
 	};
 
 	const buyData = () => {
@@ -2721,28 +2106,56 @@ const buyCable = async () => {
 			setIsLoading(true); // Set loading to true when the process starts
 	
 			// 1️⃣ Get Wallet Balance
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ wallet_id: user.id }),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0);
+			// const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ wallet_id: user.id }),
+			// });
+			// const walletData = await walletResponse.json();
+			// let old_balance = parseFloat(walletData?.available_balance || 0);
 	
-			// 2️⃣ Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
+			// // 2️⃣ Check if balance is sufficient
+			// if (old_balance < bundleAmount) {
+			// 	Swal.fire({
+			// 		title: 'Insufficient Balance',
+			// 		text: `You need at least NGN ${bundleAmount} to proceed.`,
+			// 		icon: 'error',
+			// 		customClass: { container: 'borderless' },
+			// 	});
+			// 	setIsDisabled(false);
+			// 	setIsModalOpen(false);
+			// 	return;
+			// }
+	
+			// let new_balance = old_balance - bundleAmount;
+			if (!isAdmin) {
+				// 🔒 Normal users require balance checks
+				const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ wallet_id: user.id }),
 				});
-				setIsDisabled(false);
-				setIsModalOpen(false);
-				return;
+				const walletData = await walletResponse.json();
+				old_balance = parseFloat(walletData?.available_balance || 0);
+			
+				if (old_balance < bundleAmount) {
+					Swal.fire({
+						title: 'Insufficient Balance',
+						text: `You need at least NGN ${bundleAmount} to proceed.`,
+						icon: 'error',
+						customClass: { container: 'borderless' },
+					});
+					setIsDisabled(false);
+					setIsModalOpen(false);
+					return;
+				}
+			
+				new_balance = old_balance - bundleAmount;
+			} else {
+				// 🛡️ Admin bypass: simulate 0 deduction
+				old_balance = 0;
+				new_balance = 0;
 			}
-	
-			let new_balance = old_balance - bundleAmount;
 
 			// console.log(bundleAmount);
 	
@@ -2865,179 +2278,6 @@ const buyCable = async () => {
 		}
 	};
 	
-
-	const buy_b = async (id, phone, category, amount) => {
-		// console.log('test');
-		let bundleAmount = amount.replace(/[^\d.]/g, ""); // Removes all non-numeric characters
-		
-		var response;
-		try {
-			 setIsLoading(true); // Set loading to true when the process starts
-
-			 // Get Wallet Balance
-			// Fetch the latest wallet balance from the server
-			const walletResponse = await fetch(`${getBaseUrl()}/get_balance`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				// headers: { 'Authorization': `Bearer ${user.token}` }, // Use auth if required
-				body: JSON.stringify({
-					wallet_id: user.id,
-				}),
-			});
-			const walletData = await walletResponse.json();
-			let old_balance = parseFloat(walletData?.available_balance || 0); 
-
-			// Check if balance is sufficient
-			if (old_balance < bundleAmount) {
-				Swal.fire({
-					title: 'Insufficient Balance',
-					text: `You need at least NGN ${bundleAmount} to proceed.`,
-					icon: 'error',
-					customClass: { container: 'borderless' },
-				});
-				setIsDisabled(false);
-				return;
-			}
-
-			if (isData) {
-				response = await fetch(`${getBaseUrl()}/buy`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						mobile_number: phone,
-						plan: id,
-						network,
-						category: category,
-						amount: bundleAmount,
-					}),
-				});
-			} else if (isAirtime) {
-				// response = await fetch('http://127.0.0.1:8000/api/buy',{
-				response = await fetch(`${getBaseUrl()}/vtservices_buy`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						amount: bundleAmount,
-						mobile_number: phone,
-						network,
-						plan: '',
-						category: category,
-					}),
-				});
-			}
-	
-			const data = await response.json();
-			// console.log(data);
-
-			const service = isAirtime ? 'Airtime' : 'Data';
-	
-			if (data.Status === 'successful' || data.status === 'success') {
-				// Update the database or perform any additional actions if needed
-				const wallet = JSON.parse(localStorage.getItem('wallet'));
-				let old_balance = wallet.available_balance;
-				let new_balance = old_balance - bundleAmount;
-				let transaction_id = '';
-				if (data.ident === '' || !data.ident){
-					transaction_id = data.data.content.transactions.transactionId
-				}else{
-					transaction_id = data.ident
-				}
-				let category='';
-				if(service === 'Airtime'){
-					category = 'Airtime'
-				}else{
-					category = 'Data'
-				}
-				// const updatedb =  await fetch('http://127.0.0.1:8000/api/add_transaction', {
-
-				const updatedb = await fetch(`${getBaseUrl()}/add_transaction`,{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						category,
-						service, // 'Data' is hardcoded, adjust as needed
-						amount: bundleAmount,
-						phone_num: phone,
-						transaction_id,
-						prev_balance: old_balance,
-						new_balance: new_balance,
-						status: 'Successful',
-						user_id: user.id,
-					}),
-				});
-	
-				if (updatedb) {
-					// updateBalance(bundleAmount);
-					// const wallet = JSON.parse(localStorage.getItem('wallet'));
-					// let old_balance = wallet.available_balance;
-					// let new_balance = old_balance - amount;
-					// wallet.available_balance = new_balance.toString();
-					// localStorage.setItem('wallet', JSON.stringify(wallet));
-
-					// ✅ Update React Context balance
-					setLoggedUser(prev => ({
-						...prev,
-						wallet: {
-						...prev.wallet,
-						available_balance: new_balance
-						}
-					}));
-				
-					Swal.fire({
-						title: 'Transaction Approved',
-						text: 'Your purchase was completed successfully',
-						icon: 'success',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				} else {
-					Swal.fire({
-						title: 'Transaction Failed',
-						text: 'Your purchase could not be completed!',
-						icon: 'error',
-						customClass: {
-							container: 'borderless',
-						},
-					});
-				}
-				setIsModalOpen(false);
-			}else if(data.Status === 'processing'){
-				Swal.fire({
-                    title: 'Transaction Processing',
-                    text: 'Your purchase is being processed. Please wait.',
-                    icon: 'info',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}else{
-				Swal.fire({
-                    title: 'Transaction Failed',
-                    text: 'Failed to process your purchase. Please try again later.',
-                    icon: 'error',
-                    customClass: {
-                        container: 'borderless',
-                    },
-                });
-                setIsModalOpen(false);
-			}
-		} catch (error) {
-			// console.error("Error:", error);
-		} finally {
-			 setIsLoading(false); // Set loading to false when the process ends
-		}
-	};
-	
 	// Function to format the price as currency
     const formatPrice = price => {
         return new Intl.NumberFormat('en-US', {
@@ -3112,24 +2352,6 @@ const buyCable = async () => {
 			alert('Error:', error);
 		}
 	}
-
-	const handlePhoneChange = (event) => {
-		// Only update the state if the input is a number (allowing an empty string too)
-		const value = event.target.value;
-		if (/^\d*$/.test(value)) {  // Regular expression to allow only numbers
-		  setPhoneNumber(value);
-		}
-	  };
-
-	//   const handleServiceIconChange = async (event) => {
-	// 	const selectedValue = event.target.value;
-	// 	setSelectedPlanId(null);
-	// 	setIsDisabled(true);
-    //     setSelectedIcon(selectedValue);
-	// 	setIsVisible(true);
-		
-		
-    // };
 
 	
 	const handleElectricChange = (event) => {
@@ -3270,56 +2492,6 @@ const buyCable = async () => {
 		
     };
 
-	const handleSelectChange = async (event) => {
-		const selectedValue = event.target.value;
-		if (selectedValue === '1') {
-			setNetworkSelected(mtn);
-			setNetwork(1);
-		} else if (selectedValue === '2') {
-			setNetworkSelected(glo);
-			setNetwork(2);
-		} else if (selectedValue === '3') {
-			setNetworkSelected(etisalat);
-			setNetwork(3);
-		} else if (selectedValue === '4') {
-			setNetworkSelected(airtel);
-			setNetwork(4);
-		} else {
-			setNetworkSelected('');
-		}
-		if (isData) {
-			// setDataPlans([]);
-
-			if (selectedValue) {
-				try {
-					const response = await fetch(`${getBaseUrl()}/getplans`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							network: selectedValue,
-						}),
-					});
-					const data = await response.json();
-					// console.log(data);
-					setDataPlans(data.plans);
-				} catch (error) {
-					// alert('Error:', error);
-				}
-			} else {
-				setDataPlans([]);
-			}
-		}
-
-		if(isCable){
-			const plan = servicePlans.find((p) => p.variation_code === selectedValue);
-			setSelectedPlan(plan);
-		}
-
-		
-	};
-
 
 	const adjustViewBox = () => {
 		const svg = document.querySelector('.border');
@@ -3387,26 +2559,236 @@ const SummaryTable = ({ transactions, loading, role }) => (
 	  </motion.div>
 	</div>
   );
+
+  // New Design Lovable
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [accountNumber, setAccountNumber] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+ const categories = [
+  {
+    id: 1,
+    name: "Airtime",
+    logo: "📞",
+    color: "from-green-500 to-green-700",
+    bgColor: "bg-green-50/80",
+    description: "Purchase airtime",
+  },
+  {
+    id: 2,
+    name: "Data",
+    logo: "🛰️",
+    color: "from-blue-500 to-blue-700",
+    bgColor: "bg-blue-50/80",
+    description: "Buy data bundles",
+  },
+  {
+    id: 3,
+    name: "Cable TV",
+    logo: "📺",
+    color: "from-indigo-500 to-indigo-700",
+    bgColor: "bg-indigo-50/80",
+    description: "Cable TV subscriptions",
+  },
+  {
+    id: 4,
+    name: "Electricity",
+    logo: "⚡",
+    color: "from-yellow-500 to-yellow-700",
+    bgColor: "bg-yellow-50/80",
+    description: "Pay electricity bills",
+  },
+  {
+    id: 5,
+    name: "Educational",
+    logo: "🎓",
+    color: "from-purple-500 to-purple-700",
+    bgColor: "bg-purple-50/80",
+    description: "Buy educational PINs",
+  }
+];   
+ 
+  const categories1 = [
+
+    {
+      id: 1,
+      name: "Airtime",
+      description: "Purchase airtime ",
+      icon: Phone,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      borderColor: "border-green-200",
+      providers: ["MTN", "Airtel", "Glo", "9mobile"]
+    },
+    {
+      id: 2,
+      name: "Data",
+      description: "Purchase data bundles",
+      icon: Smartphone,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200",
+      providers: ["MTN", "Airtel", "Glo", "9mobile"]
+    },
+	{
+      id: 3,
+      name: "Cable TV",
+      description: "Cable TV subscriptions",
+      icon: Tv,
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+      borderColor: "border-indigo-200",
+      providers: ["MTN", "Airtel", "Spectranet", "Swift"]
+    },
+	{
+      id: 4,
+      name: "Electricity",
+      description: "Pay your electricity bills",
+      icon: Zap,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      borderColor: "border-yellow-200",
+      providers: ["PHCN", "Ikeja Electric", "Eko Electricity"]
+    },
+    {
+      id: 5,
+      name: "Educational",
+      description: "Buy educational PINs",
+      icon: GraduationCap,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      borderColor: "border-purple-200",
+      providers: ["JAMB", "WAEC", "NECO", "Universities"]
+    },
+    
+  ];
+
+    const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+const handleCategoryClick = (category) => {
+  switch (category.slug || category.name?.toLowerCase()) {
+    case "airtime":
+      buy_airtime();
+      break;
+    case "data":
+      buy_data();
+      break;
+    case "betting":
+      buy_betting();
+      break;
+    case "cable":
+    case "cable tv":
+      buy_cable();
+      break;
+    case "electricity":
+      buy_electricity();
+      break;
+    case "education":
+    case "educational":
+      buy_ed();
+      break;
+    default:
+      console.warn("No handler for category:", category);
+      break;
+  }
+};
+
+
+const ActionsCategory = () => (
+  <div className="mx-3 lg:mx-[5px]">
+    <div className="p-2">
+      <div className="grid grid-cols-2 lg:flex flex-row-2 gap-6 justify-between flex-wrap">
+
+        {/* Render user category cards */}
+  {categories.map((category, index) => (
+    <Card
+      key={category.id}
+      className={`max-w-[200px] lg:w-[160px] group relative p-6 border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] cursor-pointer ${category.bgColor} backdrop-blur-sm overflow-hidden animate-fade-in`}
+      style={{ animationDelay: `${index * 0.1}s` }}
+      onClick={() => handleCategoryClick(category)}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
+      <div className="relative flex flex-col items-center text-center">
+        <div className={`bg-gradient-to-r ${category.color} rounded-3xl p-4 mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 text-2xl`}>
+          {category.logo}
+        </div>
+        <h3 className="font-bold text-slate-800 mb-2 group-hover:text-slate-900 transition-colors">
+          {category.name}
+        </h3>
+        <p className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
+          {category.description}
+        </p>
+      </div>
+    </Card>
+  ))}
+
+        {/* Render admin-only cards */}
+        {role !== 'user' && (
+          <>
+            <Card
+      className="group relative p-6 border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] cursor-pointer bg-green-50/80 backdrop-blur-sm overflow-hidden animate-fade-in"
+      onClick={buy_betting}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative flex flex-col items-center text-center">
+        <div className="bg-gradient-to-r from-green-500 to-green-700 rounded-3xl p-4 mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 text-2xl">
+          🏆
+        </div>
+        <h3 className="font-bold text-slate-800 mb-2 group-hover:text-slate-900 transition-colors">Betting</h3>
+        <p className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
+          Top up bet wallet
+        </p>
+      </div>
+    </Card>
+          <Card
+      className="group relative p-6 mb-16 md:mb-0 border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] cursor-pointer bg-gray-50/80 backdrop-blur-sm overflow-hidden animate-fade-in"
+      onClick={sales_report}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative flex flex-col items-center text-center">
+        <div className="bg-gradient-to-r from-gray-500 to-gray-800 rounded-3xl p-4 mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 text-2xl">
+          📊
+        </div>
+        <h3 className="font-bold text-slate-800 mb-2 group-hover:text-slate-900 transition-colors">Report</h3>
+        <p className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
+          Daily sales report
+        </p>
+      </div>
+    </Card>
+          </>
+        )}
+
+      </div>
+    </div>
+  </div>
+);
+
+
   
 
 	return (
-		<div className="super__feature mt-5 lg:mx-[82px] mb-6 overflow-hidden">
+		<div className="relative super__feature mt-2 lg:mx-[82px] mb-6 overflow-hidden">
 			<div className="lg:mx-[20px] md:mx-[30px] mx-[30px]">
-				<div>
-					<motion.div
-						initial="hidden"
-						whileInView="visible"
-						transition={{ duration: 1.5 }}
-						variants={{
-							visible: { opacity: 1, translateX: 0 },
-							hidden: { opacity: 0, translateX: -200 },
-						}}
-						className="super__actions-header mt-3 lg:mb-4"
-					>
-						<h3 className="text-bold">Quick Actions</h3>
-					</motion.div>
-				</div>
-			</div>
+							<div>
+								<motion.div
+									initial="hidden"
+									whileInView="visible"
+									transition={{ duration: 1.5 }}
+									variants={{
+										visible: { opacity: 1, translateX: 0 },
+										hidden: { opacity: 0, translateX: -200 },
+									}}
+									className="super__actions-header text-center md:text-left mt-3 lg:mb-4"
+								>
+									<h3 className="text-bold text-lg">Quick Actions</h3>
+								</motion.div>
+							</div>
+						</div>
 			<div className=''>
 				<motion.div
 					initial="hidden"
@@ -3416,244 +2798,11 @@ const SummaryTable = ({ transactions, loading, role }) => (
 						visible: { opacity: 1 },
 						hidden: { opacity: 0 },
 					}}
-					// className="grid -ml-3 text-[13px] lg:flex flex-row pl-2  text-[15px]  items-center"
-					className="super__actions grid grid-flow-row-dense mx-[2%] md:ml-20 lg:ml-4 justify-right gap-4 grid-cols-3 md:grid-cols-3 mb-2 text-[13px] lg:flex flex-row items-center text-[15px] justify-between"
-
-
-					// className="super__actions grid grid-flow-row-dense justify-between grid-cols-3 mb-2 ml-3 lg:ml-0 text-[13px] lg:flex flex-row items-center pl-5 justify-center  text-[15px]"
+					// className="super__actions grid grid-flow-row-dense mx-[2%] md:ml-20 lg:ml-4 justify-right gap-4 grid-cols-3 md:grid-cols-3 mb-2 text-[13px] lg:flex flex-row items-center text-[15px] justify-between"
 				>
 
-					
-						<button onClick={buy_airtime} className="cta__btn1 btn btnr">
-							<svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="120" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="120" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center sm:text-white">
-								<img src={call} width="25" alt="Smile" className="mb-2" />
-								<h2>Airtime</h2>
-							</div>
-						</button>
-
-
-						<button onClick={buy_data} className='cta__btn1 btn btnr'>
-						<svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center sm:text-white ">
-							<img src={internet} width="25" alt='Smile' className='mb-2'/>
-							<h2>Data</h2>
-							</div>
-						</button>
-						
-						{/* <button onClick={buy_betting} className='cta__btn1 btn btnr'>
-						<svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center text-white ">
-							<img src={bet} width="25" alt='Smile' className='mb-2'/>
-							<h2>Betting</h2>
-							</div>
-						</button> */}
-
-						<button onClick={buy_cable} className='cta__btn1 btn btnr'>
-						<svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center sm:text-white ">
-							<img src={tv} width="25" alt='Smile' className='mb-2'/>
-							<h2>Cable TV</h2>
-							</div>
-						</button>
-
-						 <button onClick={buy_electricity} className='cta__btn1 btn btnr'>
-						 <svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center sm:text-white ">
-							<img src={bolt} width="25" alt='Smile' className='mb-2'/>
-							<h2>Electricity</h2>
-							</div>
-						</button>
-					
-						<button onClick={buy_ed} className='cta__btn1 btn btnr'>
-						<svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center sm:text-white ">
-							<img src={book} width="25" alt='Smile' className='mb-2'/>
-							<h2>Educational</h2>
-							</div>
-						</button>
-					
-					
-					{role !== 'user'  &&(
-						<button onClick={sales_report} className='cta__btn1 btn btnr'>
-						<svg 
-								className="border" 
-								viewBox="0 0 186 100" 
-								preserveAspectRatio="none" 
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="bg-line" 
-								/>
-								<rect 
-									x="1" 
-									y="1" 
-									width="184" 
-									height="98" 
-									rx="10" 
-									ry="10" 
-									className="hl-line" 
-								/>
-							</svg>
-							<div className="flex flex-col w-full p-3 text-center items-center sm:text-white ">
-							<img src={report} width="25" alt='Smile' className='mb-2'/>
-							<h2>Report</h2>
-							</div>
-						</button>
-					
-					)}
-					
-					
+				<ActionsCategory/>
+				
 
 				</motion.div>
 			</div>
@@ -4799,7 +3948,7 @@ const SummaryTable = ({ transactions, loading, role }) => (
 											</div> */}
 											<div className="icon-container mb-3">
 									
-													<label className='mr-1 border border-gray-200 rounded-lg w-[150px] shadow-md'>
+													<label className='mr-1 border border-gray-200 rounded-lg w-[130px] shadow-md'>
 														<input type="radio" name="icon"
                     										onClick={() => setEdCategory('JAMB')}
 														/>
@@ -4810,7 +3959,7 @@ const SummaryTable = ({ transactions, loading, role }) => (
 														</div>
 													</label>
 
-													<label className='border border-gray-200 rounded-lg w-[150px] shadow-md'>
+													<label className='border border-gray-200 rounded-lg w-[130px] shadow-md'>
 														<input type="radio" name="icon" 
                     										onClick={() => setEdCategory('WAEC')}
 														/>
@@ -4823,7 +3972,7 @@ const SummaryTable = ({ transactions, loading, role }) => (
 													
 												</div>
 												<div className='icon-container mb-6'>
-												<label className='mr-1 border border-gray-200 rounded-lg w-[150px] shadow-md'>
+												<label className='mr-1 border border-gray-200 rounded-lg w-[130px] shadow-md'>
 														<input type="radio" name="icon" 
                     										onClick={() => setEdCategory('NECO')}
 														/>
@@ -4833,7 +3982,7 @@ const SummaryTable = ({ transactions, loading, role }) => (
 														</div>
 													</label>
 
-													<label className='border border-gray-200 rounded-lg w-[150px] shadow-md'>
+													<label className='border border-gray-200 rounded-lg w-[130px] shadow-md'>
 														<input type="radio" name="icon"
                     										onClick={() => setEdCategory('NABTEB')}
 														/>

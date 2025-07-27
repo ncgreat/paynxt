@@ -27,7 +27,7 @@ const Step1 = ({ onNext, onPrevious, logOut, setComplete }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const getBaseUrl = () => `${import.meta.env.VITE_API_BASE_URL}/api`;
-
+  const HERE_API_KEY = 'vw6zAJtDTO0khU0BsU8Rt1o1uymtNkXOyC6HvHMmn7U'; // Replace with your HERE key
     // Single `useFloating` instance for both dropdown and tooltip
     const { refs, floatingStyles, middlewareData } = useFloating({
       placement: "bottom-start", // Placement for dropdown (adjust dynamically for tooltip)
@@ -79,10 +79,46 @@ const Step1 = ({ onNext, onPrevious, logOut, setComplete }) => {
   }, [profileData]);
 
 
+const handleAddressSubmit = async () => {
+  const vendorAddress = address;
+  if (!vendorAddress) return null;
+
+  try {
+    const res = await axios.get('https://geocode.search.hereapi.com/v1/geocode', {
+      params: {
+        q: address.toLowerCase().includes('kaduna') ? address : `${address}, Kaduna, Nigeria`,
+        apiKey: HERE_API_KEY,
+        in: 'countryCode:NGA',
+      },
+    });
+
+    const kadunaMatch = res.data.items.find(
+      item => item.address.state?.toUpperCase() === 'KADUNA'
+    );
+
+   if (kadunaMatch) {
+      const { lat, lng } = kadunaMatch.position;
+      // setUserCoords({ lat, lng });
+
+      // localStorage.setItem(
+      //   "userCoords",
+      //   JSON.stringify({ lat, lng, verified: true }) // ✅ Store immediately as verified
+      // );
+
+      return { lat, lng };
+    } else {
+      return await fallbackGeocodeWithOpenCage(address);
+    }
+  } catch (err) {
+    console.error('HERE Geocode error:', err?.response?.data || err.message);
+    return await fallbackGeocodeWithOpenCage(address);
+  }
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
-
+    const vendor_coordinate = await handleAddressSubmit();
     if(profileData?.address || profileData?.phone){
       console.log(profileData?.address);
       console.log(profileData?.phone);
@@ -100,6 +136,7 @@ const Step1 = ({ onNext, onPrevious, logOut, setComplete }) => {
     formData.append('facebook', facebook);
     formData.append('instagram', instagram);
     formData.append('twitter', twitter);
+    formData.append('geolocation', vendor_coordinate)
     if (logo) {
       formData.append('logo_url', logo);
     }

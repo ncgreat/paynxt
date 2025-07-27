@@ -360,7 +360,7 @@ const More = ({user}) => {
                     </div>
                 ):(
                     <button
-                    onClick={() => {setIsUpdateKYC(true)}} // Add logic for disabling 2FA
+                    // onClick={() => {setIsUpdateKYC(true)}} // Add logic for disabling 2FA
                     className="bg-[#230d29] text-white px-4 py-2 my-2 rounded-md hover:bg-[#206657] w-full text-left items-center justify-between"
                     style={{
                         display: isPassVisible ? "flex" : "none",
@@ -408,7 +408,7 @@ const More = ({user}) => {
                     </div>
                 ):(
                     <button
-                    onClick={() => {setIsNextKin(true)}} // Add logic for disabling 2FA
+                    // onClick={() => {setIsNextKin(true)}} // Add logic for disabling 2FA
                     className="bg-[#230d29] text-white px-4 py-2 my-2 rounded-md hover:bg-[#206657] w-full text-left items-center justify-between"
                     style={{
                         display: isPassVisible ? "flex" : "none",
